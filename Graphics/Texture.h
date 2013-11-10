@@ -4,6 +4,8 @@
 
 #include <GL/glew.h>
 
+#include <boost/format.hpp>
+
 #include <string>
 #include <memory>
 
@@ -18,6 +20,7 @@ public:
 	std::shared_ptr<ResourceHolder> ActivateScoped(int targetTextureUnit = 0);
 
 private:
+	bool Init(const std::string& filePath, boost::format& errorMsg);
 
 	static void Set(GLuint textureId, int targetTextureUnit);
 

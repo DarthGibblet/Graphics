@@ -52,13 +52,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Rick\Documents\Development\libraries\glfw\3.0\include;C:\Users\Rick\Documents\Development\libraries\glew\1.10\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Rick\Documents\Development\libraries\boost\1.54;C:\Users\Rick\Documents\Development\libraries\glfw\3.0\include;C:\Users\Rick\Documents\Development\libraries\glew\1.10\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glfw3dll_x64.lib;Opengl32.lib;glewdll_x64.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\Rick\Documents\Development\libraries\glfw\3.0\lib;C:\Users\Rick\Documents\Development\libraries\glew\1.10\lib;%(AdditionalLibraryDirectories)C:\Users\Rick\Documents\Development\libraries\glew\1.10\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Rick\Documents\Development\libraries\boost\1.54\lib;C:\Users\Rick\Documents\Development\libraries\glfw\3.0\lib;C:\Users\Rick\Documents\Development\libraries\glew\1.10\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

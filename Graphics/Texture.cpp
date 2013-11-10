@@ -1,38 +1,53 @@
 #include "Texture.h"
 
+#include <iostream>
+#include <fstream>
+
 #include <Windows.h>
+
+using std::cout;
+using std::endl;
 
 Texture::Texture(const std::string& filePath) : _textureId(0)
 {
-	unsigned char header[124];
+	boost::format initErrorMsg;
+	if(!Init(filePath, initErrorMsg))
+		cout <<initErrorMsg <<endl;
+}
 
-	FILE *fp;
+bool Texture::Init(const std::string& filePath, boost::format& errorMsg)
+{
+	std::ifstream fin(filePath, std::ios_base::binary);
 
-	fopen_s(&fp, filePath.c_str(), "rb");
-
-	char filecode[4];
-	fread(filecode, 1, 4, fp);
-	if(strncmp(filecode, "DDS ", 4) != 0)
+	if(!fin.is_open())
 	{
-		fclose(fp);
-		return;
+		char errorDetail[128];
+		strerror_s(errorDetail, errno);
+		errorMsg = boost::format("Error opening file: \"%s\": %s") % filePath % errorDetail;
+		return false;
 	}
 
-	fread(&header, 124, 1, fp);
-	unsigned int height = *(unsigned int*)&(header[8]);
-	unsigned int width = *(unsigned int*)&(header[12]);
-	unsigned int linearSize = *(unsigned int*)&(header[16]);
-	unsigned int mipMapCount = *(unsigned int*)&(header[24]);
-	unsigned int fourCC = *(unsigned int*)&(header[80]);
+	//First check to make sure the file is in the expected format
+	char fileCode[4];
+	fin.read(fileCode, 4);
+	if(strncmp(fileCode, "DDS ", 4) != 0)
+	{
+		errorMsg = boost::format("File \"%s\" does not self-identify as a DDS file") % filePath;
+		return false;
+	}
 
-	unsigned char* buffer;
-	unsigned int bufsize;
-	bufsize = mipMapCount > 1 ? linearSize * 2 : linearSize;
-	buffer = (unsigned char*)malloc(bufsize * sizeof(unsigned char));
-	auto rv = fread(buffer, 1, bufsize, fp);
-	fclose(fp);
-
-	unsigned int components = (fourCC == mmioFOURCC('D', 'X', 'T', '1'));
+	//Easier to deal with the header as an array of unsigned ints than a raw char buffer
+	const static unsigned int DDS_HEADER_SIZE = 31;
+	unsigned int fileHeader[DDS_HEADER_SIZE];
+	fin.read(reinterpret_cast<char*>(fileHeader), DDS_HEADER_SIZE * sizeof(unsigned int));
+	//We're only interested in a few key values
+	unsigned int&	height = fileHeader[2],
+					width = fileHeader[3],
+					linearSize = fileHeader[4],
+					mipMapCount = fileHeader[6],
+					fourCC = fileHeader[20];
+	
+	//Check the four character code to make sure we're using a format OpenGL can understand
 	unsigned int format;
 	switch(fourCC)
 	{
@@ -46,30 +61,38 @@ Texture::Texture(const std::string& filePath) : _textureId(0)
 		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 		break;
 	default:
-		free(buffer);
-		return;
+		errorMsg = boost::format("File \"%s\" uses an unrecognized fourCC: %d") % filePath % fourCC;
+		return false;
 	}
 
+	//Now that we've got all the metadata we need, read the meat of the file
+	unsigned int bufSize = mipMapCount > 1 ? linearSize * 2 : linearSize;
+	std::unique_ptr<char[]> buffer(new char[bufSize]);
+	fin.read(buffer.get(), bufSize);
+
+	//Create the texture and tell OpenGL to use Mipmaps when scaling
 	glGenTextures(1, &_textureId);
-
 	glBindTexture(GL_TEXTURE_2D, _textureId);
-
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-
-	unsigned int blockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-	unsigned int offset = 0;
-
-	for(unsigned int level = 0; level < mipMapCount && (width || height); ++level)
+	//Dump the data for the main texture and all mipmaps into OpenGL
+	unsigned int blockSize = format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16;
+	char* curOffset = buffer.get();
+	unsigned int curWidth = width, curHeight = height;
+	for(unsigned int level = 0; level < mipMapCount && (curWidth || curHeight); ++level)
 	{
-		unsigned int size = ((width + 3)/4) * ((height + 3)/4)*blockSize;
-		glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height, 0, size, buffer + offset);
-		offset += size;
-		width /= 2;
-		height /= 2;
+		unsigned int size = ((curWidth + 3)/4) * ((curHeight + 3)/4) * blockSize;
+		glCompressedTexImage2D(GL_TEXTURE_2D, level, format, curWidth, curHeight, 0, size, curOffset);
+		curOffset += size;
+		curWidth /= 2;
+		curHeight /= 2;
 	}
-	free(buffer);
+
+	//Unbind the texture so it's not hanging around after the constructor call
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return true;
 }
 
 void Texture::Activate(int targetTextureUnit)
