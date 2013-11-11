@@ -1,4 +1,5 @@
 #include "Texture.h"
+#include "Shader.h"
 
 #include <iostream>
 
@@ -20,6 +21,8 @@ int main(int argc, char** argv)
 	GLFWwindow* window = glfwCreateWindow(1920, 1080, "My Title", NULL, NULL);
 	glfwMakeContextCurrent(window);
 
+	ResourceHolder glfwHolder([&window]() { glfwDestroyWindow(window); glfwTerminate(); });
+
 	if(glewInit() != GLEW_OK)
 	{
 		cerr <<"Failed to initialize GLEW" <<endl;
@@ -28,26 +31,8 @@ int main(int argc, char** argv)
 
 	glEnable(GL_TEXTURE_2D);
 
-	GLuint shaderVP = glCreateShader(GL_VERTEX_SHADER);
-	GLuint shaderFP = glCreateShader(GL_FRAGMENT_SHADER);
-
-	const char* vsText = "void main() { gl_FrontColor = gl_Color; gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; }";
-	const char* fsText = "void main() { gl_FragColor = normalize(vec4(0.0, 0.25, 0.0, 0.0) + (gl_Color * 0.5)); }";
-
-	glShaderSource(shaderVP, 1, &vsText, 0);
-	glShaderSource(shaderFP, 1, &fsText, 0);
-
-	glCompileShader(shaderVP);
-	glCompileShader(shaderFP);
-
-	GLuint shaderID = glCreateProgram();
-	glAttachShader(shaderID, shaderFP);
-	glAttachShader(shaderID, shaderVP);
-	glLinkProgram(shaderID);
-
-	//glUseProgram(shaderID);
-
 	Texture tex("..\\resources\\Gust.dds");
+	Shader shader("..\\resources\\DemoShader");
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -61,6 +46,7 @@ int main(int argc, char** argv)
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glBindTexture(GL_TEXTURE_2D, 0);
+		glUseProgram(0);
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -88,35 +74,27 @@ int main(int argc, char** argv)
 			glEnd();
 		}
 
-		glBegin(GL_QUADS);
-		glTexCoord2f(0, 0);
-		glColor3f(0, 1, 0);
-		glVertex3f(0.6f, -0.6f, 0);
-		glTexCoord2f(1, 0);
-		glColor3f(1, 0, 0);
-		glVertex3f(1.8f, -0.6f, 0);
-		glTexCoord2f(1, 1);
-		glColor3f(1, 1, 0);
-		glVertex3f(1.8f, 0.6f, 0);
-		glTexCoord2f(0, 1);
-		glColor3f(0, 0, 1);
-		glVertex3f(0.6f, 0.6f, 0);
-		glEnd();
+		{
+			auto shaderHolder = shader.ActivateScoped();
+			glBegin(GL_QUADS);
+			glTexCoord2f(0, 0);
+			glColor3f(0, 1, 0);
+			glVertex3f(0.6f, -0.6f, 0);
+			glTexCoord2f(1, 0);
+			glColor3f(1, 0, 0);
+			glVertex3f(1.8f, -0.6f, 0);
+			glTexCoord2f(1, 1);
+			glColor3f(1, 1, 0);
+			glVertex3f(1.8f, 0.6f, 0);
+			glTexCoord2f(0, 1);
+			glColor3f(0, 0, 1);
+			glVertex3f(0.6f, 0.6f, 0);
+			glEnd();
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
-	glDetachShader(shaderID, shaderFP);
-	glDetachShader(shaderID, shaderVP);
-
-	glDeleteShader(shaderFP);
-	glDeleteShader(shaderVP);
-	glDeleteShader(shaderID);
-
-	glfwDestroyWindow(window);
-
-	glfwTerminate();
 
 	return 0;
 }
