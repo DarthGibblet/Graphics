@@ -39,6 +39,7 @@
     <Import Project="..\properties\libraries\boost.props" />
     <Import Project="..\properties\libraries\glew.props" />
     <Import Project="..\properties\libraries\glfw.props" />
+    <Import Project="..\properties\libraries\glm.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -47,6 +48,7 @@
     <Import Project="..\properties\libraries\boost.props" />
     <Import Project="..\properties\libraries\glew.props" />
     <Import Project="..\properties\libraries\glfw.props" />
+    <Import Project="..\properties\libraries\glm.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
@@ -60,7 +62,10 @@
     <Link />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Box.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Quadtree.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Utils.cpp" />
@@ -69,6 +74,9 @@
     <Image Include="..\resources\Gust.dds" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Box.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="Quadtree.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Utils.h" />
