@@ -17,6 +17,9 @@ Texture::Texture(const std::string& filePath) : _textureId(0)
 
 bool Texture::Init(const std::string& filePath, boost::format& errorMsg)
 {
+	if(filePath.empty())
+		return true;
+
 	std::ifstream fin(filePath, std::ios_base::binary);
 
 	if(!fin.is_open())
