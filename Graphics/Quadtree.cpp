@@ -30,30 +30,26 @@ void Quadtree::Update(const double& secondsSinceLastUpdate)
 	CheckCollisions();
 }
 
-void Quadtree::Draw(bool drawGraph)
+void Quadtree::Draw()
 {
-	foreach(_children, std::bind(&Quadtree::Draw, std::placeholders::_1, drawGraph));
-	foreach(_trackedObjs, std::bind(&Object::Draw, std::placeholders::_1));
+	foreach(_children, std::bind(&Quadtree::Draw, std::placeholders::_1));
 
-	if(drawGraph)
-	{
-		glLineWidth(2.5);
-		float currentColor[4];
-		glGetFloatv(GL_CURRENT_COLOR, currentColor);
-		glColor3f(_gridColors[_depth][0], _gridColors[_depth][1], _gridColors[_depth][2]);
-		glPushMatrix();
-		glTranslatef(_pos.x, _pos.y, _pos.z);
+	glLineWidth(2.5);
+	float currentColor[4];
+	glGetFloatv(GL_CURRENT_COLOR, currentColor);
+	glColor3f(_gridColors[_depth][0], _gridColors[_depth][1], _gridColors[_depth][2]);
+	glPushMatrix();
+	glTranslatef(_pos.x, _pos.y, _pos.z);
 
-		glBegin(GL_LINE_LOOP);
-		glVertex3f((float)-_width / 2, (float) _height / 2, 0);
-		glVertex3f((float) _width / 2, (float) _height / 2, 0);
-		glVertex3f((float) _width / 2, (float)-_height / 2, 0);
-		glVertex3f((float)-_width / 2, (float)-_height / 2, 0);
-		glEnd();
-		glColor3f(currentColor[0], currentColor[1], currentColor[2]);
+	glBegin(GL_LINE_LOOP);
+	glVertex3f((float)-_width / 2, (float) _height / 2, 0);
+	glVertex3f((float) _width / 2, (float) _height / 2, 0);
+	glVertex3f((float) _width / 2, (float)-_height / 2, 0);
+	glVertex3f((float)-_width / 2, (float)-_height / 2, 0);
+	glEnd();
 
-		glPopMatrix();
-	}
+	glColor3f(currentColor[0], currentColor[1], currentColor[2]);
+	glPopMatrix();
 }
 
 void Quadtree::Insert(Object* obj)

@@ -11,7 +11,7 @@ public:
 	Quadtree(const glm::vec3& pos, const double& width, const double& height, int depth = 0);
 	~Quadtree();
 	void Update(const double& secondsSinceLastUpdate);
-	void Draw(bool drawGraph);
+	void Draw();
 	void Insert(Object* obj);
 
 private:

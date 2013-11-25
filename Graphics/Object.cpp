@@ -2,8 +2,12 @@
 
 #include <GL/glew.h>
 
-Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& texPath, bool falls) : 
-	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _tex(texPath)
+Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& texPath, bool falls, Type::E type) : 
+	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true), _tex(texPath)
+{
+}
+
+Object::~Object()
 {
 }
 
@@ -45,13 +49,38 @@ bool Object::DoesCollide(Object* other)
 
 void Object::HandleCollision(std::shared_ptr<Object> other)
 {
-	HandleCollision(other.get());
+	this->HandleCollision(other.get());
 }
 
 void Object::HandleCollision(Object* other)
 {
-	_pos = _prevPos;
-	_vel = glm::vec3(0, 0, 0);
+	switch(_type)
+	{
+	case Type::Block:
+		break;
+	case Type::Player:
+		switch(other->_type)
+		{
+		case Type::Block:
+			_pos = _prevPos;
+			_vel = glm::vec3(0, 0, 0);
+			break;
+		case Type::Bullet:
+			break;
+		case Type::Enemy:
+			_isAlive = false;
+			break;
+		}
+		break;
+	case Type::Enemy:
+		switch(other->_type)
+		{
+		case Type::Bullet:
+			_isAlive = false;
+			break;
+		}
+		break;
+	}
 }
 
 bool Object::IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight)
@@ -62,4 +91,29 @@ bool Object::IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth
 		_pos.y + _size.y / 2 <= boxCenter.y + boxHeight / 2)
 		return true;
 	return false;
+}
+
+Object::Type::E Object::Type()
+{
+	return _type;
+}
+
+void Object::Vel(const glm::vec3& vel)
+{
+	_vel = vel;
+}
+
+glm::vec3& Object::Vel()
+{
+	return _vel;
+}
+
+glm::vec3& Object::Pos()
+{
+	return _pos;
+}
+
+bool Object::IsAlive()
+{
+	return _isAlive;
 }
