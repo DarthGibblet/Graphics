@@ -41,7 +41,7 @@ protected:
 	glm::vec3 _prevPos;
 	Type::E _type;
 
-	bool _isAlive;
+	bool _isAlive, _facingBackwards;
 	
 	Texture _tex;
 	Box _mesh;

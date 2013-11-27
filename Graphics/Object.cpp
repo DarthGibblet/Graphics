@@ -3,7 +3,8 @@
 #include <GL/glew.h>
 
 Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& texPath, bool falls, Type::E type) : 
-	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true), _tex(texPath), _glQueryId(0)
+	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true),
+	_facingBackwards(false), _tex(texPath), _glQueryId(0)
 {
 	glGenQueries(1, &_glQueryId);
 }
@@ -21,6 +22,11 @@ void Object::Update(const double& secondsSinceLastUpdate)
 		//_rotAngle += secondsSinceLastUpdate * 150;
 	}
 
+	if(_facingBackwards && _vel.x > 0)
+		_facingBackwards = false;
+	if(!_facingBackwards && _vel.x < 0)
+		_facingBackwards = true;
+
 	_prevPos = _pos;
 	_pos += _vel * (float)secondsSinceLastUpdate;
 }
@@ -32,7 +38,7 @@ void Object::Draw()
 	glTranslatef(_pos.x, _pos.y, _pos.z);
 	glRotatef((float)_rotAngle, _rotAxis.x, _rotAxis.y, _rotAxis.z);
 	glScalef(_size.x, _size.y, _size.z);
-	_mesh.Draw();
+	_mesh.Draw(_facingBackwards);
 	glPopMatrix();
 }
 

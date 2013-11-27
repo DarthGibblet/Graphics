@@ -7,7 +7,7 @@ class Box
 public:
 	Box();
 
-	void Draw();
+	void Draw(const bool drawBackwards);
 
 private:
 };
