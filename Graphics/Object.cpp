@@ -47,6 +47,11 @@ bool Object::DoesCollide(Object* other)
 	{
 		if(abs(_pos.y - other->_pos.y) < _size.y / 2 + other->_size.y / 2)
 		{
+			//Sometimes (eg when colliding with the envoronment), we don't want pixel-perfect collisions. In that case, 
+			//  just having the bounding boxes collide is enough
+			if(!UsePreciseCollisions() || !other->UsePreciseCollisions())
+				return true;
+
 			glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT | GL_STENCIL_BUFFER_BIT);
 			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 			glDisable(GL_LIGHTING);
@@ -92,8 +97,25 @@ void Object::HandleCollision(Object* other)
 		switch(other->_type)
 		{
 		case Type::Block:
-			_pos = _prevPos;
-			_vel = glm::vec3(0, 0, 0);
+			{
+				//If we're colliding with a block, then there should be a dimension in which _prevPos wasn't colliding.
+				//  Find which dimension that is, then reset _pos to match _prevPos along that axis.
+				auto doesXCollide = abs(_pos.x - other->_pos.x) < _size.x / 2 + other->_size.x / 2;
+				auto doesYCollide = abs(_pos.y - other->_pos.y) < _size.y / 2 + other->_size.y / 2;
+				auto doesXCollideLastFrame = abs(_prevPos.x - other->_prevPos.x) < _size.x / 2 + other->_size.x / 2;
+				auto doesYCollideLastFrame = abs(_prevPos.y - other->_prevPos.y) < _size.y / 2 + other->_size.y / 2;
+
+				if(doesXCollide && !doesXCollideLastFrame)
+				{
+					_pos.x = _prevPos.x;
+					_vel.x = 0;
+				}
+				if(doesYCollide && !doesYCollideLastFrame)
+				{
+					_pos.y = _prevPos.y;
+					_vel.y = 0;
+				}
+			}
 			break;
 		case Type::Bullet:
 			break;
@@ -121,6 +143,11 @@ bool Object::IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth
 		_pos.y + _size.y / 2 <= boxCenter.y + boxHeight / 2)
 		return true;
 	return false;
+}
+
+bool Object::UsePreciseCollisions()
+{
+	return _type != Type::Block;
 }
 
 Object::Type::E Object::Type()

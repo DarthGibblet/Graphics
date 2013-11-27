@@ -27,6 +27,7 @@ public:
 	void HandleCollision(std::shared_ptr<Object> other);
 	virtual void HandleCollision(Object* other);
 	bool IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight);
+	bool UsePreciseCollisions();
 
 	Type::E Type();
 	void Vel(const glm::vec3& vel);
