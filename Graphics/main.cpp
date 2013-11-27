@@ -100,7 +100,7 @@ int main(int argc, char** argv)
 	double ratio = (double)frameBufferHeight / frameBufferWidth;
 	Camera cam(10, ratio);
 
-	auto player = std::make_shared<Object>(glm::vec3(0, 5, 0), glm::vec3(1, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player);
+	auto player = std::make_shared<Object>(glm::vec3(0, 5, 0), glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player);
 
 	cam.Teather(player.get());
 	cam.SetRestrictLeft(-ZONE_MAX_X);
@@ -108,10 +108,10 @@ int main(int argc, char** argv)
 	cam.SetRestrictTop(ZONE_MAX_Y);
 	cam.SetRestrictBottom(-ZONE_MAX_Y);
 
-	auto enemy = std::make_shared<Object>(glm::vec3(-3, -2.5, 0), glm::vec3(5, 5, 5), "..\\resources\\Gust.dds", false, Object::Type::Enemy);
+	auto enemy = std::make_shared<Object>(glm::vec3(-3, -2.5, 0), glm::vec3(5*0.8, 5, 5), "..\\resources\\Gust.dds", false, Object::Type::Enemy);
 	enemy->Vel(glm::vec3(0.25, 0, 0));
 
-	std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-6, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Gust.dds", player.get());
+	std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-6, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Bullet.dds", player.get());
 
 	masterList.push_back(std::make_shared<Object>(glm::vec3(0, -7, 0), glm::vec3(26, 4, 1), std::string(), false, Object::Type::Block));
 	masterList.push_back(std::make_shared<Object>(glm::vec3(3, 0, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));

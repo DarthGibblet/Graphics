@@ -76,7 +76,7 @@ bool Object::DoesCollide(Object* other)
 			glPopAttrib();
 			//if(_type != Type::Block && other->Type() != Type::Block)
 			//	std::cout <<"Collision of " <<resultCount <<" pixels." <<std::endl;
-			return resultCount != 0;
+			return resultCount >= 10;
 		}
 	}
 	return false;
