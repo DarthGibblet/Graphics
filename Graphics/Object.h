@@ -44,4 +44,5 @@ protected:
 	
 	Texture _tex;
 	Box _mesh;
+	GLuint _glQueryId;
 };

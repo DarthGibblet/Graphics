@@ -3,12 +3,14 @@
 #include <GL/glew.h>
 
 Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& texPath, bool falls, Type::E type) : 
-	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true), _tex(texPath)
+	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true), _tex(texPath), _glQueryId(0)
 {
+	glGenQueries(1, &_glQueryId);
 }
 
 Object::~Object()
 {
+	glDeleteQueries(1, &_glQueryId);
 }
 
 void Object::Update(const double& secondsSinceLastUpdate)
@@ -42,8 +44,36 @@ bool Object::DoesCollide(std::shared_ptr<Object> other)
 bool Object::DoesCollide(Object* other)
 {
 	if(abs(_pos.x - other->_pos.x) < _size.x / 2 + other->_size.x / 2)
+	{
 		if(abs(_pos.y - other->_pos.y) < _size.y / 2 + other->_size.y / 2)
-			return true;
+		{
+			glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_POLYGON_BIT | GL_STENCIL_BUFFER_BIT);
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+			glDisable(GL_LIGHTING);
+			glDepthMask(GL_FALSE);
+			glEnable(GL_STENCIL_TEST);
+
+			glStencilFunc(GL_ALWAYS, 1, 1);
+			glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+			Draw();
+
+			glBeginQuery(GL_SAMPLES_PASSED, _glQueryId);
+			glStencilFunc(GL_EQUAL, 1, 1);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+			other->Draw();
+
+			glEndQuery(GL_SAMPLES_PASSED);
+			GLint resultCount = 0;
+
+			glGetQueryObjectiv(_glQueryId, GL_QUERY_RESULT, &resultCount);
+
+			glClear(GL_STENCIL_BUFFER_BIT);
+			glPopAttrib();
+			//if(_type != Type::Block && other->Type() != Type::Block)
+			//	std::cout <<"Collision of " <<resultCount <<" pixels." <<std::endl;
+			return resultCount != 0;
+		}
+	}
 	return false;
 }
 
@@ -68,7 +98,7 @@ void Object::HandleCollision(Object* other)
 		case Type::Bullet:
 			break;
 		case Type::Enemy:
-			_isAlive = false;
+			//_isAlive = false;
 			break;
 		}
 		break;
@@ -76,7 +106,7 @@ void Object::HandleCollision(Object* other)
 		switch(other->_type)
 		{
 		case Type::Bullet:
-			_isAlive = false;
+			//_isAlive = false;
 			break;
 		}
 		break;

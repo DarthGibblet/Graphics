@@ -58,6 +58,7 @@ int main(int argc, char** argv)
 	}
 
 	glfwWindowHint(GLFW_SAMPLES, 16);
+	glfwWindowHint(GLFW_STENCIL_BITS, 8);
 	GLFWwindow* window = glfwCreateWindow(1920, 1080, "My Title", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -79,6 +80,8 @@ int main(int argc, char** argv)
 	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_STENCIL);
+	glEnable(GL_STENCIL_TEST);
 
 	Shader shader("..\\resources\\DemoShader");
 
@@ -105,10 +108,10 @@ int main(int argc, char** argv)
 	cam.SetRestrictTop(ZONE_MAX_Y);
 	cam.SetRestrictBottom(-ZONE_MAX_Y);
 
-	auto enemy = std::make_shared<Object>(glm::vec3(-3, -4, 0), glm::vec3(0.25, 0.25, 0.25), "..\\resources\\Gust.dds", false, Object::Type::Enemy);
+	auto enemy = std::make_shared<Object>(glm::vec3(-3, -2.5, 0), glm::vec3(5, 5, 5), "..\\resources\\Gust.dds", false, Object::Type::Enemy);
 	enemy->Vel(glm::vec3(0.25, 0, 0));
 
-	std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-4, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Gust.dds", player.get());
+	std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-6, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Gust.dds", player.get());
 
 	masterList.push_back(std::make_shared<Object>(glm::vec3(0, -7, 0), glm::vec3(26, 4, 1), std::string(), false, Object::Type::Block));
 	masterList.push_back(std::make_shared<Object>(glm::vec3(3, 0, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));
@@ -162,6 +165,7 @@ int main(int argc, char** argv)
 		
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glUseProgram(0);
 
