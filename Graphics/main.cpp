@@ -21,32 +21,80 @@ bool _pushRight = false;
 bool _jump = false;
 bool _shouldClose = false;
 
+void ToggleUsingQuadtree()
+{
+	_useQuadtree = !_useQuadtree;
+}
+
+void ToggleDrawingQuadtree()
+{
+	_drawQuadtreeGraph = !_drawQuadtreeGraph;
+}
+
+void PushLeft()
+{
+	_pushLeft = true;
+}
+
+void StopLeft()
+{
+	_pushLeft = false;
+}
+
+void PushRight()
+{
+	_pushRight = true;
+}
+
+void StopRight()
+{
+	_pushRight = false;
+}
+
+void Jump()
+{
+	_jump = true;
+}
+
+void ShouldCloseWindow()
+{
+	_shouldClose = true;
+}
+
 void OnKeyPress(GLFWwindow* /*window*/, int key, int /*scanCode*/, int action, int /*mods*/)
 {
-	if(action == GLFW_PRESS)
+	//Just throw out repeat actions. We're only interested in GLFW_PRESS and GLFW_RELEASE
+	if(action == GLFW_REPEAT)
+		return;
+
+	typedef std::function<void()> keypress_func_t;
+	static keypress_func_t _keyDownActions[GLFW_KEY_LAST];
+	static keypress_func_t _keyUpActions[GLFW_KEY_LAST];
+	static bool _initialized = false;
+	if(!_initialized)
 	{
-		switch(key)
+		for(int i=0;i<GLFW_KEY_LAST; ++i)
 		{
-		case GLFW_KEY_Q:
-			_useQuadtree = !_useQuadtree;
-			break;
-		case GLFW_KEY_D:
-			_drawQuadtreeGraph = !_drawQuadtreeGraph;
-			break;
-		case GLFW_KEY_LEFT:
-			_pushLeft = true;
-			break;
-		case GLFW_KEY_RIGHT:
-			_pushRight = true;
-			break;
-		case GLFW_KEY_SPACE:
-			_jump = true;
-			break;
-		case GLFW_KEY_ESCAPE:
-			_shouldClose = true;
-			break;
+			_keyDownActions[i] = keypress_func_t();
+			_keyUpActions[i] = keypress_func_t();
+
+			_keyDownActions[GLFW_KEY_Q] = &ToggleUsingQuadtree;
+			_keyDownActions[GLFW_KEY_D] = &ToggleDrawingQuadtree;
+			_keyDownActions[GLFW_KEY_LEFT] = &PushLeft;
+			_keyUpActions[GLFW_KEY_LEFT] = &StopLeft;
+			_keyDownActions[GLFW_KEY_RIGHT] = &PushRight;
+			_keyUpActions[GLFW_KEY_RIGHT] = &StopRight;
+			_keyDownActions[GLFW_KEY_SPACE] = &Jump;
+			_keyDownActions[GLFW_KEY_ESCAPE] = &ShouldCloseWindow;
+
 		}
+		_initialized = true;
 	}
+
+	auto& actionToPerform = action == GLFW_PRESS ? _keyDownActions[key] : _keyUpActions[key];
+
+	if(actionToPerform)
+		actionToPerform();
 }
 
 int main(int argc, char** argv)
@@ -72,6 +120,10 @@ int main(int argc, char** argv)
 		cerr <<"Failed to initialize GLEW" <<endl;
 		return -1;
 	}
+
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	glViewport(0, 0, width, height);
 
 	glEnable(GL_TEXTURE_2D);
 	//glEnable(GL_BLEND);
@@ -115,6 +167,8 @@ int main(int argc, char** argv)
 
 	masterList.push_back(std::make_shared<Object>(glm::vec3(0, -7, 0), glm::vec3(26, 4, 1), std::string(), false, Object::Type::Block));
 	masterList.push_back(std::make_shared<Object>(glm::vec3(3, 0, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));
+	masterList.push_back(std::make_shared<Object>(glm::vec3(-13, 0, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));
+	masterList.push_back(std::make_shared<Object>(glm::vec3(-7, 3, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));
 	masterList.push_back(player);
 	masterList.push_back(enemy);
 	masterList.push_back(bullet);
@@ -140,37 +194,19 @@ int main(int argc, char** argv)
 			framerateStartTime = curTime;
 		}
 
-		if(_pushLeft)
-		{
-			player->Vel() += glm::vec3(-1, 0, 0);
-			_pushLeft = false;
-		}
-		if(_pushRight)
-		{
-			player->Vel() += glm::vec3(1, 0, 0);
-			_pushRight = false;
-		}
-		if(_jump)
-		{
-			player->Vel() += glm::vec3(0, 1, 0);
-			_jump = false;
-		}
-
-		double ratio;
-		int width, height;
-
-		glfwGetFramebufferSize(window, &width, &height);
-
-		ratio = width / (double)height;
-		
-		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glUseProgram(0);
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
+
+		//Frame action order:
+		//  1.) Remove dead objects
+		//  2.) Perform collision detection and response
+		//  3.) Respond to user input
+		//  4.) Perform "Update" function
+		//  5.) Draw
 
 		masterList = std::vector<std::shared_ptr<Object>>(std::begin(masterList), std::remove_if(std::begin(masterList), std::end(masterList), [](std::shared_ptr<Object> obj) -> bool
 		{
@@ -207,9 +243,28 @@ int main(int argc, char** argv)
 			}
 		}
 
-		cam.Update(timeSinceLastFrame);
-		cam.Draw();
+		if(_pushLeft)
+		{
+			//player->Vel(player->Vel() + glm::vec3(-1, 0, 0));
+			player->MoveLeft();
+			//_pushLeft = false;
+		}
+		if(_pushRight)
+		{
+			//player->Vel(player->Vel() + glm::vec3(1, 0, 0));
+			player->MoveRight();
+			//_pushRight = false;
+		}
+		if(_jump)
+		{
+			//player->Vel(player->Vel() + glm::vec3(0, 1, 0));
+			player->Jump();
+			_jump = false;
+		}
 
+		cam.Update(timeSinceLastFrame);
+
+		cam.Draw();
 		foreach(masterList, std::bind(&Object::Draw, std::placeholders::_1));
 
 		glfwSwapBuffers(window);

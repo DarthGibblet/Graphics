@@ -29,9 +29,14 @@ public:
 	bool IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight);
 	bool UsePreciseCollisions();
 
+	void Jump();
+	void MoveLeft();
+	void MoveRight();
+	void Grab();
+
 	Type::E Type();
 	void Vel(const glm::vec3& vel);
-	glm::vec3& Vel();
+	const glm::vec3& Vel();
 	glm::vec3& Pos();
 	bool IsAlive();
 protected:
@@ -42,6 +47,9 @@ protected:
 	Type::E _type;
 
 	bool _isAlive, _facingBackwards;
+	unsigned int _maxJumps, _jumpsRemaining;
+	bool _wallJumpable, _wallJumpLeft;
+	bool _movingLeft, _movingRight, _suspendFriction;
 	
 	Texture _tex;
 	Box _mesh;

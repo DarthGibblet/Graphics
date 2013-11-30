@@ -4,7 +4,8 @@
 
 Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& texPath, bool falls, Type::E type) : 
 	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true),
-	_facingBackwards(false), _tex(texPath), _glQueryId(0)
+	_facingBackwards(false), _maxJumps(1), _jumpsRemaining(0), _wallJumpable(false), _movingLeft(false), _movingRight(false),
+	_suspendFriction(false), _tex(texPath), _glQueryId(0)
 {
 	glGenQueries(1, &_glQueryId);
 }
@@ -18,17 +19,27 @@ void Object::Update(const double& secondsSinceLastUpdate)
 {
 	if(_falls)
 	{
-		_vel.y -= (float)(0.5 * secondsSinceLastUpdate);
+		_vel.y -= (float)(6 * secondsSinceLastUpdate);
+		if(_vel.y < -10)
+			_vel.y = -10;
 		//_rotAngle += secondsSinceLastUpdate * 150;
 	}
 
-	if(_facingBackwards && _vel.x > 0)
-		_facingBackwards = false;
-	if(!_facingBackwards && _vel.x < 0)
-		_facingBackwards = true;
+	if(_movingLeft != _movingRight)
+	{
+		if(_movingLeft && _vel.x > -5)
+			Vel(Vel() + glm::vec3(-15 * secondsSinceLastUpdate, 0, 0));
+		if(_movingRight && _vel.x < 5)
+			Vel(Vel() + glm::vec3(15 * secondsSinceLastUpdate, 0, 0));
+
+		_suspendFriction = true;
+	}
 
 	_prevPos = _pos;
 	_pos += _vel * (float)secondsSinceLastUpdate;
+
+	_movingLeft = _movingRight = false;
+	_wallJumpable = false;
 }
 
 void Object::Draw()
@@ -114,12 +125,18 @@ void Object::HandleCollision(Object* other)
 				if(doesXCollide && !doesXCollideLastFrame)
 				{
 					_pos.x = _prevPos.x;
+					_vel.y = 0;
 					_vel.x = 0;
+					_wallJumpable = true;
+					_wallJumpLeft = _pos.x < other->_pos.x;
 				}
 				if(doesYCollide && !doesYCollideLastFrame)
 				{
 					_pos.y = _prevPos.y;
+					if(!_suspendFriction)
+						_vel.x = 0;
 					_vel.y = 0;
+					_jumpsRemaining = _maxJumps;
 				}
 			}
 			break;
@@ -139,6 +156,8 @@ void Object::HandleCollision(Object* other)
 		}
 		break;
 	}
+
+	_suspendFriction = false;
 }
 
 bool Object::IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight)
@@ -156,6 +175,30 @@ bool Object::UsePreciseCollisions()
 	return _type != Type::Block;
 }
 
+void Object::Jump()
+{
+	if(_jumpsRemaining > 0)
+	{
+		--_jumpsRemaining;
+		_vel.y = 5;
+	}
+	else if(_wallJumpable)
+	{
+		auto wallJumpVel = glm::vec3((_wallJumpLeft ? -10 : 10), 4, 0);
+		Vel(wallJumpVel);
+	}
+}
+
+void Object::MoveLeft()
+{
+	_movingLeft = true;
+}
+
+void Object::MoveRight()
+{
+	_movingRight = true;
+}
+
 Object::Type::E Object::Type()
 {
 	return _type;
@@ -164,9 +207,13 @@ Object::Type::E Object::Type()
 void Object::Vel(const glm::vec3& vel)
 {
 	_vel = vel;
+	if(_facingBackwards && _vel.x > 0)
+		_facingBackwards = false;
+	if(!_facingBackwards && _vel.x < 0)
+		_facingBackwards = true;
 }
 
-glm::vec3& Object::Vel()
+const glm::vec3& Object::Vel()
 {
 	return _vel;
 }
