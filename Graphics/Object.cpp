@@ -4,8 +4,7 @@
 
 Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& texPath, bool falls, Type::E type) : 
 	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true),
-	_facingBackwards(false), _maxJumps(1), _jumpsRemaining(0), _wallJumpable(false), _movingLeft(false), _movingRight(false),
-	_suspendFriction(false), _tex(texPath), _glQueryId(0)
+	_facingBackwards(false), _tex(texPath), _glQueryId(0)
 {
 	glGenQueries(1, &_glQueryId);
 }
@@ -25,31 +24,8 @@ void Object::Update(const double& secondsSinceLastUpdate)
 		//_rotAngle += secondsSinceLastUpdate * 150;
 	}
 
-	if(_movingLeft != _movingRight)
-	{
-		if(_movingLeft && _vel.x > -5)
-			Vel(Vel() + glm::vec3(-15 * secondsSinceLastUpdate, 0, 0));
-		if(_movingRight && _vel.x < 5)
-			Vel(Vel() + glm::vec3(15 * secondsSinceLastUpdate, 0, 0));
-
-		_suspendFriction = true;
-	}
-
 	_prevPos = _pos;
 	_pos += _vel * (float)secondsSinceLastUpdate;
-
-
-	if(_wallJumpable)
-	{
-		auto lastWallJumpCountdown = _wallJumpableCountdown;
-		_wallJumpableCountdown -= secondsSinceLastUpdate;
-		if(_wallJumpableCountdown <= 0)
-			_wallJumpable = false;
-	}
-
-	_jumpHoldTimer += secondsSinceLastUpdate;
-
-	_movingLeft = _movingRight = false;
 }
 
 void Object::Draw()
@@ -120,45 +96,6 @@ void Object::HandleCollision(Object* other)
 	{
 	case Type::Block:
 		break;
-	case Type::Player:
-		switch(other->_type)
-		{
-		case Type::Block:
-			{
-				//If we're colliding with a block, then there should be a dimension in which _prevPos wasn't colliding.
-				//  Find which dimension that is, then reset _pos to match _prevPos along that axis.
-				auto doesXCollide = abs(_pos.x - other->_pos.x) < _size.x / 2 + other->_size.x / 2;
-				auto doesYCollide = abs(_pos.y - other->_pos.y) < _size.y / 2 + other->_size.y / 2;
-				auto doesXCollideLastFrame = abs(_prevPos.x - other->_prevPos.x) < _size.x / 2 + other->_size.x / 2;
-				auto doesYCollideLastFrame = abs(_prevPos.y - other->_prevPos.y) < _size.y / 2 + other->_size.y / 2;
-
-				if(doesXCollide && !doesXCollideLastFrame)
-				{
-					_pos.x = _prevPos.x;
-					_pos.y = _prevPos.y;
-					_vel.y = 0;
-					_vel.x = 0;
-					_wallJumpable = true;
-					_wallJumpableCountdown = 0.5;
-					_wallJumpLeft = _pos.x < other->_pos.x;
-				}
-				if(doesYCollide && !doesYCollideLastFrame)
-				{
-					_pos.y = _prevPos.y;
-					if(!_suspendFriction)
-						_vel.x = 0;
-					_vel.y = 0;
-					_jumpsRemaining = _maxJumps;
-				}
-			}
-			break;
-		case Type::Bullet:
-			break;
-		case Type::Enemy:
-			//_isAlive = false;
-			break;
-		}
-		break;
 	case Type::Enemy:
 		switch(other->_type)
 		{
@@ -168,8 +105,6 @@ void Object::HandleCollision(Object* other)
 		}
 		break;
 	}
-
-	_suspendFriction = false;
 }
 
 bool Object::IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight)
@@ -185,42 +120,6 @@ bool Object::IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth
 bool Object::UsePreciseCollisions()
 {
 	return _type != Type::Block;
-}
-
-void Object::JumpHold()
-{
-	_jumpHoldTimer = 1;
-	if(_jumpsRemaining <= 0 && _wallJumpable)
-	{
-		auto jumpVec = glm::vec3((_wallJumpLeft ? -10 : 10), 4, 0);
-		Vel(Vel() + jumpVec);
-	}
-}
-
-void Object::JumpRelease()
-{
-	glm::vec3 jumpVec;
-	if(_jumpsRemaining > 0)
-	{
-		--_jumpsRemaining;
-		jumpVec = glm::vec3(0, 3.5, 0);
-
-		if(_jumpHoldTimer > 2)
-			_jumpHoldTimer = 2;
-
-		jumpVec *= _jumpHoldTimer;
-		Vel(Vel() + jumpVec);
-	}
-}
-
-void Object::MoveLeft()
-{
-	_movingLeft = true;
-}
-
-void Object::MoveRight()
-{
-	_movingRight = true;
 }
 
 Object::Type::E Object::Type()
@@ -242,9 +141,19 @@ const glm::vec3& Object::Vel()
 	return _vel;
 }
 
-glm::vec3& Object::Pos()
+const glm::vec3& Object::Pos()
 {
 	return _pos;
+}
+
+const glm::vec3& Object::PrevPos()
+{
+	return _prevPos;
+}
+
+const glm::vec3& Object::Size()
+{
+	return _size;
 }
 
 bool Object::IsAlive()

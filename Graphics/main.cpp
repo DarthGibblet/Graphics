@@ -1,7 +1,9 @@
 #include "Texture.h"
 #include "Shader.h"
 #include "Object.h"
+#include "Player.h"
 #include "Bullet.h"
+#include "Upgrade.h"
 #include "Camera.h"
 #include "Quadtree.h"
 
@@ -143,7 +145,7 @@ int main(int argc, char** argv)
 
 	Shader shader("..\\resources\\DemoShader");
 
-	const double ZONE_MAX_X = 13, ZONE_MAX_Y = 6;
+	const double ZONE_MAX_X = 26, ZONE_MAX_Y = 6;
 
 	vector<std::shared_ptr<Object>> masterList;
 	//for(int i=0;i<200;++i)
@@ -158,7 +160,7 @@ int main(int argc, char** argv)
 	double ratio = (double)frameBufferHeight / frameBufferWidth;
 	Camera cam(10, ratio);
 
-	auto player = std::make_shared<Object>(glm::vec3(0, 5, 0), glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player);
+	std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(0, 5, 0));
 
 	cam.Teather(player.get());
 	cam.SetRestrictLeft(-ZONE_MAX_X);
@@ -171,13 +173,17 @@ int main(int argc, char** argv)
 
 	std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-6, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Bullet.dds", player.get());
 
-	masterList.push_back(std::make_shared<Object>(glm::vec3(0, -7, 0), glm::vec3(26, 4, 1), std::string(), false, Object::Type::Block));
+	//Create the environment blocks
+	masterList.push_back(std::make_shared<Object>(glm::vec3(0, -7, 0), glm::vec3(52, 4, 1), std::string(), false, Object::Type::Block));
 	masterList.push_back(std::make_shared<Object>(glm::vec3(3, 0, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));
-	masterList.push_back(std::make_shared<Object>(glm::vec3(-13, 0, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));
-	masterList.push_back(std::make_shared<Object>(glm::vec3(-7, 3, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));
+	masterList.push_back(std::make_shared<Object>(glm::vec3(-13, -3, 0), glm::vec3(1, 5, 1), std::string(), false, Object::Type::Block));
+	masterList.push_back(std::make_shared<Object>(glm::vec3(-3, 3, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));
+
 	masterList.push_back(player);
 	masterList.push_back(enemy);
 	masterList.push_back(bullet);
+	masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-16, -3, 0), glm::vec3(1, 1, 1), "..\\resources\\WallJump.dds", Upgrade::Type::WALL_JUMP));
+	masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-10, 0, 0), glm::vec3(1, 1, 1), "..\\resources\\DoubleJump.dds", Upgrade::Type::DOUBLE_JUMP));
 	
 	double lastTime = glfwGetTime(), framerateStartTime = lastTime;
 

@@ -12,7 +12,7 @@ class Object
 public:
 	struct Type
 	{
-		enum E { Generic, Block, Player, Enemy, Bullet, Camera };
+		enum E { Generic, Block, Player, Enemy, Bullet, Upgrade, Camera };
 	};
 
 	Object(const glm::vec3& pos, const glm::vec3& size, const std::string& texPath, bool falls, Type::E type);
@@ -29,16 +29,12 @@ public:
 	bool IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight);
 	bool UsePreciseCollisions();
 
-	void JumpHold();
-	void JumpRelease();
-	void MoveLeft();
-	void MoveRight();
-	void Grab();
-
 	Type::E Type();
 	void Vel(const glm::vec3& vel);
 	const glm::vec3& Vel();
-	glm::vec3& Pos();
+	const glm::vec3& Pos();
+	const glm::vec3& PrevPos();
+	const glm::vec3& Size();
 	bool IsAlive();
 protected:
 	glm::vec3 _pos, _size, _rotAxis, _vel;
@@ -48,11 +44,6 @@ protected:
 	Type::E _type;
 
 	bool _isAlive, _facingBackwards;
-	unsigned int _maxJumps, _jumpsRemaining;
-	double _jumpHoldTimer;
-	bool _wallJumpable, _wallJumpLeft;
-	double _wallJumpableCountdown;
-	bool _movingLeft, _movingRight, _suspendFriction;
 	
 	Texture _tex;
 	Box _mesh;
