@@ -29,7 +29,8 @@ public:
 	bool IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight);
 	bool UsePreciseCollisions();
 
-	void Jump();
+	void JumpHold();
+	void JumpRelease();
 	void MoveLeft();
 	void MoveRight();
 	void Grab();
@@ -48,7 +49,9 @@ protected:
 
 	bool _isAlive, _facingBackwards;
 	unsigned int _maxJumps, _jumpsRemaining;
+	double _jumpHoldTimer;
 	bool _wallJumpable, _wallJumpLeft;
+	double _wallJumpableCountdown;
 	bool _movingLeft, _movingRight, _suspendFriction;
 	
 	Texture _tex;

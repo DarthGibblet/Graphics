@@ -38,8 +38,18 @@ void Object::Update(const double& secondsSinceLastUpdate)
 	_prevPos = _pos;
 	_pos += _vel * (float)secondsSinceLastUpdate;
 
+
+	if(_wallJumpable)
+	{
+		auto lastWallJumpCountdown = _wallJumpableCountdown;
+		_wallJumpableCountdown -= secondsSinceLastUpdate;
+		if(_wallJumpableCountdown <= 0)
+			_wallJumpable = false;
+	}
+
+	_jumpHoldTimer += secondsSinceLastUpdate;
+
 	_movingLeft = _movingRight = false;
-	_wallJumpable = false;
 }
 
 void Object::Draw()
@@ -125,9 +135,11 @@ void Object::HandleCollision(Object* other)
 				if(doesXCollide && !doesXCollideLastFrame)
 				{
 					_pos.x = _prevPos.x;
+					_pos.y = _prevPos.y;
 					_vel.y = 0;
 					_vel.x = 0;
 					_wallJumpable = true;
+					_wallJumpableCountdown = 0.5;
 					_wallJumpLeft = _pos.x < other->_pos.x;
 				}
 				if(doesYCollide && !doesYCollideLastFrame)
@@ -175,17 +187,29 @@ bool Object::UsePreciseCollisions()
 	return _type != Type::Block;
 }
 
-void Object::Jump()
+void Object::JumpHold()
 {
+	_jumpHoldTimer = 1;
+	if(_jumpsRemaining <= 0 && _wallJumpable)
+	{
+		auto jumpVec = glm::vec3((_wallJumpLeft ? -10 : 10), 4, 0);
+		Vel(Vel() + jumpVec);
+	}
+}
+
+void Object::JumpRelease()
+{
+	glm::vec3 jumpVec;
 	if(_jumpsRemaining > 0)
 	{
 		--_jumpsRemaining;
-		_vel.y = 5;
-	}
-	else if(_wallJumpable)
-	{
-		auto wallJumpVel = glm::vec3((_wallJumpLeft ? -10 : 10), 4, 0);
-		Vel(wallJumpVel);
+		jumpVec = glm::vec3(0, 3.5, 0);
+
+		if(_jumpHoldTimer > 2)
+			_jumpHoldTimer = 2;
+
+		jumpVec *= _jumpHoldTimer;
+		Vel(Vel() + jumpVec);
 	}
 }
 

@@ -18,7 +18,7 @@ bool _useQuadtree = true;
 bool _drawQuadtreeGraph = false;
 bool _pushLeft = false;
 bool _pushRight = false;
-bool _jump = false;
+bool _jump = false, _releaseJump = false;
 bool _shouldClose = false;
 
 void ToggleUsingQuadtree()
@@ -51,9 +51,14 @@ void StopRight()
 	_pushRight = false;
 }
 
-void Jump()
+void JumpHold()
 {
 	_jump = true;
+}
+
+void JumpRelease()
+{
+	_releaseJump = true;
 }
 
 void ShouldCloseWindow()
@@ -84,7 +89,8 @@ void OnKeyPress(GLFWwindow* /*window*/, int key, int /*scanCode*/, int action, i
 			_keyUpActions[GLFW_KEY_LEFT] = &StopLeft;
 			_keyDownActions[GLFW_KEY_RIGHT] = &PushRight;
 			_keyUpActions[GLFW_KEY_RIGHT] = &StopRight;
-			_keyDownActions[GLFW_KEY_SPACE] = &Jump;
+			_keyDownActions[GLFW_KEY_SPACE] = &JumpHold;
+			_keyUpActions[GLFW_KEY_SPACE] = &JumpRelease;
 			_keyDownActions[GLFW_KEY_ESCAPE] = &ShouldCloseWindow;
 
 		}
@@ -258,8 +264,13 @@ int main(int argc, char** argv)
 		if(_jump)
 		{
 			//player->Vel(player->Vel() + glm::vec3(0, 1, 0));
-			player->Jump();
+			player->JumpHold();
 			_jump = false;
+		}
+		if(_releaseJump)
+		{
+			player->JumpRelease();
+			_releaseJump = false;
 		}
 
 		cam.Update(timeSinceLastFrame);
