@@ -46,6 +46,9 @@ bool Object::DoesCollide(std::shared_ptr<Object> other)
 
 bool Object::DoesCollide(Object* other)
 {
+	if(Type() == Object::Type::Bullet && other->Type() == Object::Type::Bullet)
+		return false;
+
 	if(abs(_pos.x - other->_pos.x) < _size.x / 2 + other->_size.x / 2)
 	{
 		if(abs(_pos.y - other->_pos.y) < _size.y / 2 + other->_size.y / 2)

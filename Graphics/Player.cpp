@@ -2,13 +2,14 @@
 #include "Upgrade.h"
 
 Player::Player(const glm::vec3& pos) : Object(pos, glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player),
-		_jumpsRemaining(0), _wallJumpable(false), _movingLeft(false), _movingRight(false), 
+		_jumpsRemaining(0), _jumpHoldTimer(0), _wallJumpable(false), _movingLeft(false), _movingRight(false), 
 		_suspendFriction(true), _upgradeMask(0)
 {
 }
 
 void Player::Update(const double& secondsSinceLastUpdate)
 {
+	_suspendFriction = false;
 	if(_movingLeft != _movingRight)
 	{
 		if(_movingLeft && _vel.x > -5)
@@ -27,7 +28,14 @@ void Player::Update(const double& secondsSinceLastUpdate)
 			_wallJumpable = false;
 	}
 
-	_jumpHoldTimer += secondsSinceLastUpdate;
+	if(_jumpHoldTimer != 0)
+		_jumpHoldTimer += secondsSinceLastUpdate;
+
+	if(_jumpHoldTimer > 1.25)
+	{
+		_jumpHoldTimer = 1.25;
+		JumpRelease();
+	}
 
 	_movingLeft = _movingRight = false;
 
@@ -77,7 +85,6 @@ void Player::HandleCollision(Object* other)
 		_upgradeMask |= reinterpret_cast<Upgrade*>(other)->Power();
 		break;
 	}
-	_suspendFriction = false;
 }
 
 void Player::JumpHold()
@@ -93,17 +100,17 @@ void Player::JumpHold()
 void Player::JumpRelease()
 {
 	glm::vec3 jumpVec;
-	if(_jumpsRemaining > 0)
+	if(_jumpsRemaining > 0 && _jumpHoldTimer != 0)
 	{
 		--_jumpsRemaining;
 		jumpVec = glm::vec3(0, 3.5, 0);
 
-		if(_jumpHoldTimer > 2)
-			_jumpHoldTimer = 2;
-
-		jumpVec *= _jumpHoldTimer;
-		Vel(Vel() + jumpVec);
+		jumpVec *= (_jumpHoldTimer * 2 / 1.25);
+		jumpVec.x = Vel().x;
+		Vel(jumpVec);
 	}
+
+	_jumpHoldTimer = 0;
 }
 
 void Player::MoveLeft()

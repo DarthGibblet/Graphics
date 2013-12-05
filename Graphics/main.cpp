@@ -148,12 +148,6 @@ int main(int argc, char** argv)
 	const double ZONE_MAX_X = 26, ZONE_MAX_Y = 6;
 
 	vector<std::shared_ptr<Object>> masterList;
-	//for(int i=0;i<200;++i)
-	//{
-	//	double randx = double(rand() % int(ZONE_MAX_X * 100 * 2) - (ZONE_MAX_X * 100) ) / 100;
-	//	double randy = double(rand() % int(ZONE_MAX_Y * 100 * 2) - (ZONE_MAX_Y * 100) ) / 100;
-	//	masterList.push_back(std::make_shared<Object>(glm::vec3(randx, randy, 0), glm::vec3(0.3, 0.3, 0.3), "..\\resources\\Gust.dds", true, Object::Type::Bullet));
-	//}
 
 	int frameBufferWidth, frameBufferHeight;
 	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
@@ -170,6 +164,18 @@ int main(int argc, char** argv)
 
 	auto enemy = std::make_shared<Object>(glm::vec3(-3, -2.5, 0), glm::vec3(5*0.8, 5, 5), "..\\resources\\Gust.dds", false, Object::Type::Enemy);
 	enemy->Vel(glm::vec3(0.25, 0, 0));
+
+	//for(int i=0;i<300;++i)
+	//{
+	//	double randx = double(rand() % int(ZONE_MAX_X * 100 * 2) - (ZONE_MAX_X * 100) ) / 100;
+	//	double randy = double(rand() % int(ZONE_MAX_Y * 100 * 2) - (ZONE_MAX_Y * 100) ) / 100;
+	//	double randVelx = double(rand() % 40 - 20) / 20;
+	//	double randVely = double(rand() % 40 - 20) / 20;
+	//	std::shared_ptr<Bullet> newBullet = std::make_shared<Bullet>(glm::vec3(randx, randy, 0), glm::vec3(0, 0, 0), "..\\resources\\Bullet.dds", player.get());
+	//	newBullet->Vel(glm::vec3(randVelx, randVely, 0));
+	//	newBullet->SetBounds(-ZONE_MAX_X, ZONE_MAX_X, -ZONE_MAX_Y, ZONE_MAX_Y);
+	//	masterList.push_back(newBullet);
+	//}
 
 	std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-6, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Bullet.dds", player.get());
 
@@ -194,6 +200,10 @@ int main(int argc, char** argv)
 		double curTime = glfwGetTime();
 		double timeSinceLastFrame = curTime - lastTime;
 		lastTime = curTime;
+
+		//Really quick hack to get rid of those pesky weird case frames (like window resizing/moving, pausing in a debugger, things like that
+		if(timeSinceLastFrame > 1)
+			continue;
 
 		++frameCount;
 
@@ -227,8 +237,7 @@ int main(int argc, char** argv)
 
 		if(_useQuadtree)
 		{
-			//Since the quadtree will move with the camera, we'll have to re-insert most objects most frames anyway
-			//  Rather than including logic to only re-insert needed objects, just re-insert every object every frame
+			//TODO*** - Have logic to maintain a constant QuadTree object between frames and only re-insert the objects that have moved since the last frame
 			Quadtree objCollection(glm::vec3(0, 0, 0), ZONE_MAX_X * 2, ZONE_MAX_Y * 2);
 			std::for_each(std::begin(masterList), std::end(masterList), [&objCollection](decltype(*std::begin(masterList)) obj)
 			{
@@ -249,7 +258,7 @@ int main(int argc, char** argv)
 					if((*iObj)->DoesCollide(*jObj))
 					{
 						(*iObj)->HandleCollision(*jObj);
-						(*jObj)->HandleCollision(*jObj);
+						(*jObj)->HandleCollision(*iObj);
 					}
 				}
 			}
