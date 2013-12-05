@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 
 #include <string>
+#include <map>
 
 class Object
 {
@@ -15,7 +16,7 @@ public:
 		enum E { Generic, Block, Player, Enemy, Bullet, Upgrade, Camera };
 	};
 
-	Object(const glm::vec3& pos, const glm::vec3& size, const std::string& texPath, bool falls, Type::E type);
+	Object(const glm::vec3& pos, const glm::vec3& size, const std::string& textPath, bool falls, Type::E type);
 	
 	virtual ~Object();
 
@@ -45,7 +46,9 @@ protected:
 
 	bool _isAlive, _facingBackwards;
 	
-	Texture _tex;
+	//Texture _tex;
+	static std::map<std::string, std::shared_ptr<Texture>> _textureCache;
+	std::shared_ptr<Texture> _text;
 	Box _mesh;
 	GLuint _glQueryId;
 };

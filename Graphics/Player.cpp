@@ -89,11 +89,15 @@ void Player::HandleCollision(Object* other)
 
 void Player::JumpHold()
 {
-	_jumpHoldTimer = 1;
-	if(_jumpsRemaining <= 0 && _wallJumpable)
+	//_jumpHoldTimer = 1;
+	if(/*_jumpsRemaining <= 0 &&*/ _wallJumpable)
 	{
 		auto jumpVec = glm::vec3((_wallJumpLeft ? -10 : 10), 4, 0);
 		Vel(Vel() + jumpVec);
+	}
+	else if(_jumpsRemaining >= 0)
+	{
+		_jumpHoldTimer = 1;
 	}
 }
 

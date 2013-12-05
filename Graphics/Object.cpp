@@ -2,10 +2,23 @@
 
 #include <GL/glew.h>
 
-Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& texPath, bool falls, Type::E type) : 
+std::map<std::string, std::shared_ptr<Texture>> Object::_textureCache;
+
+Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& textPath, bool falls, Type::E type) : 
 	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true),
-	_facingBackwards(false), _tex(texPath), _glQueryId(0)
+	_facingBackwards(false), _glQueryId(0)
 {
+	auto foundText = _textureCache.find(textPath);
+	if(foundText == std::end(_textureCache))
+	{
+		_text = std::make_shared<Texture>(textPath);
+		_textureCache[textPath] = _text;
+	}
+	else
+	{
+		_text = foundText->second;
+	}
+
 	glGenQueries(1, &_glQueryId);
 }
 
@@ -30,7 +43,7 @@ void Object::Update(const double& secondsSinceLastUpdate)
 
 void Object::Draw()
 {
-	auto texHolder = _tex.ActivateScoped();
+	auto texHolder = _text->ActivateScoped();
 	glPushMatrix();
 	glTranslatef(_pos.x, _pos.y, _pos.z);
 	glRotatef((float)_rotAngle, _rotAxis.x, _rotAxis.y, _rotAxis.z);

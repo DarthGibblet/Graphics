@@ -1,7 +1,7 @@
 #include "Bullet.h"
 
-Bullet::Bullet(const glm::vec3& pos, const glm::vec3& vel, const std::string& texPath, const Object* owner, const glm::vec3& size) :
-	Object(pos, size, texPath, false, Type::Bullet), _owner(owner), _minX(0), _maxX(0), _minY(0), _maxY(0)
+Bullet::Bullet(const glm::vec3& pos, const glm::vec3& vel, const std::string& textPath, const Object* owner, const glm::vec3& size) :
+	Object(pos, size, textPath, false, Type::Bullet), _owner(owner), _minX(0), _maxX(0), _minY(0), _maxY(0)
 {
 	_vel = vel;
 }

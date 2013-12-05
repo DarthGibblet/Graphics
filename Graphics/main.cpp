@@ -165,7 +165,7 @@ int main(int argc, char** argv)
 	auto enemy = std::make_shared<Object>(glm::vec3(-3, -2.5, 0), glm::vec3(5*0.8, 5, 5), "..\\resources\\Gust.dds", false, Object::Type::Enemy);
 	enemy->Vel(glm::vec3(0.25, 0, 0));
 
-	//for(int i=0;i<300;++i)
+	//for(int i=0;i<2000;++i)
 	//{
 	//	double randx = double(rand() % int(ZONE_MAX_X * 100 * 2) - (ZONE_MAX_X * 100) ) / 100;
 	//	double randy = double(rand() % int(ZONE_MAX_Y * 100 * 2) - (ZONE_MAX_Y * 100) ) / 100;
@@ -266,19 +266,14 @@ int main(int argc, char** argv)
 
 		if(_pushLeft)
 		{
-			//player->Vel(player->Vel() + glm::vec3(-1, 0, 0));
 			player->MoveLeft();
-			//_pushLeft = false;
 		}
 		if(_pushRight)
 		{
-			//player->Vel(player->Vel() + glm::vec3(1, 0, 0));
 			player->MoveRight();
-			//_pushRight = false;
 		}
 		if(_jump)
 		{
-			//player->Vel(player->Vel() + glm::vec3(0, 1, 0));
 			player->JumpHold();
 			_jump = false;
 		}
