@@ -21,6 +21,7 @@ bool _drawQuadtreeGraph = false;
 bool _pushLeft = false;
 bool _pushRight = false;
 bool _jump = false, _releaseJump = false;
+bool _fire = false;
 bool _shouldClose = false;
 
 void ToggleUsingQuadtree()
@@ -63,6 +64,11 @@ void JumpRelease()
 	_releaseJump = true;
 }
 
+void Fire()
+{
+	_fire = true;
+}
+
 void ShouldCloseWindow()
 {
 	_shouldClose = true;
@@ -93,6 +99,7 @@ void OnKeyPress(GLFWwindow* /*window*/, int key, int /*scanCode*/, int action, i
 			_keyUpActions[GLFW_KEY_RIGHT] = &StopRight;
 			_keyDownActions[GLFW_KEY_SPACE] = &JumpHold;
 			_keyUpActions[GLFW_KEY_SPACE] = &JumpRelease;
+			_keyDownActions[GLFW_KEY_F] = &Fire;
 			_keyDownActions[GLFW_KEY_ESCAPE] = &ShouldCloseWindow;
 
 		}
@@ -177,7 +184,7 @@ int main(int argc, char** argv)
 	//	masterList.push_back(newBullet);
 	//}
 
-	std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-6, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Bullet.dds", player.get());
+	//std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-6, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Bullet.dds", player.get());
 
 	//Create the environment blocks
 	masterList.push_back(std::make_shared<Object>(glm::vec3(0, -7, 0), glm::vec3(52, 4, 1), std::string(), false, Object::Type::Block));
@@ -187,7 +194,7 @@ int main(int argc, char** argv)
 
 	masterList.push_back(player);
 	masterList.push_back(enemy);
-	masterList.push_back(bullet);
+	//masterList.push_back(bullet);
 	masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-16, -3, 0), glm::vec3(1, 1, 1), "..\\resources\\WallJump.dds", Upgrade::Type::WALL_JUMP));
 	masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-10, 0, 0), glm::vec3(1, 1, 1), "..\\resources\\DoubleJump.dds", Upgrade::Type::DOUBLE_JUMP));
 	
@@ -281,6 +288,13 @@ int main(int argc, char** argv)
 		{
 			player->JumpRelease();
 			_releaseJump = false;
+		}
+		if(_fire)
+		{
+			auto newBullet = player->Fire();
+			newBullet->SetBounds(-ZONE_MAX_X, ZONE_MAX_X, -ZONE_MAX_Y, ZONE_MAX_Y);
+			masterList.push_back(newBullet);
+			_fire = false;
 		}
 
 		cam.Update(timeSinceLastFrame);

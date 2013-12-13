@@ -1,8 +1,9 @@
 #include "Player.h"
 #include "Upgrade.h"
+#include "Constants.h"
 
 Player::Player(const glm::vec3& pos) : Object(pos, glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player),
-		_jumpsRemaining(0), _jumpHoldTimer(0), _wallJumpable(false), _movingLeft(false), _movingRight(false), 
+		_jumpsRemaining(0), _isJumping(false), _wallJumpable(false), _movingLeft(false), _movingRight(false), 
 		_suspendFriction(true), _upgradeMask(0)
 {
 }
@@ -28,13 +29,15 @@ void Player::Update(const double& secondsSinceLastUpdate)
 			_wallJumpable = false;
 	}
 
-	if(_jumpHoldTimer != 0)
-		_jumpHoldTimer += secondsSinceLastUpdate;
-
-	if(_jumpHoldTimer > 1.25)
+	if(_isJumping && _jumpHoldTimer < MAX_JUMP_HOLD_DURATION)
 	{
-		_jumpHoldTimer = 1.25;
-		JumpRelease();
+		auto tmpJumpVel = _curJumpVel;
+		if(_curJumpVel.x == 0)
+		{
+			tmpJumpVel.x = Vel().x;
+		}
+		Vel(tmpJumpVel);
+		_jumpHoldTimer += secondsSinceLastUpdate;
 	}
 
 	_movingLeft = _movingRight = false;
@@ -72,7 +75,8 @@ void Player::HandleCollision(Object* other)
 				if(!_suspendFriction)
 					_vel.x = 0;
 				_vel.y = 0;
-				_jumpsRemaining = _upgradeMask & Upgrade::Type::DOUBLE_JUMP ? 2 : 1;
+				if(Pos().y > other->Pos().y)
+					_jumpsRemaining = _upgradeMask & Upgrade::Type::DOUBLE_JUMP ? 2 : 1;
 			}
 		}
 		break;
@@ -89,32 +93,25 @@ void Player::HandleCollision(Object* other)
 
 void Player::JumpHold()
 {
-	//_jumpHoldTimer = 1;
-	if(/*_jumpsRemaining <= 0 &&*/ _wallJumpable)
+	if(_wallJumpable)
 	{
-		auto jumpVec = glm::vec3((_wallJumpLeft ? -10 : 10), 4, 0);
-		Vel(Vel() + jumpVec);
+		_jumpHoldTimer = 0;
+		_isJumping = true;
+		_curJumpVel = glm::vec3((_wallJumpLeft ? -5 : 5), 2, 0);
 	}
-	else if(_jumpsRemaining >= 0)
+	else if(_jumpsRemaining > 0)
 	{
-		_jumpHoldTimer = 1;
+		_jumpHoldTimer = 0;
+		--_jumpsRemaining;
+		_curJumpVel = glm::vec3(0, BASE_JUMP_STRENGTH, 0);
+		_isJumping = true;
 	}
 }
 
 void Player::JumpRelease()
 {
-	glm::vec3 jumpVec;
-	if(_jumpsRemaining > 0 && _jumpHoldTimer != 0)
-	{
-		--_jumpsRemaining;
-		jumpVec = glm::vec3(0, 3.5, 0);
-
-		jumpVec *= (_jumpHoldTimer * 2 / 1.25);
-		jumpVec.x = Vel().x;
-		Vel(jumpVec);
-	}
-
 	_jumpHoldTimer = 0;
+	_isJumping = false;
 }
 
 void Player::MoveLeft()
@@ -125,4 +122,10 @@ void Player::MoveLeft()
 void Player::MoveRight()
 {
 	_movingRight = true;
+}
+
+std::shared_ptr<Bullet> Player::Fire()
+{
+	glm::vec3 bulletVel(_facingBackwards ? -BULLET_SPEED : BULLET_SPEED, 0, 0);
+	return std::make_shared<Bullet>(_pos, bulletVel, "..\\resources\\Bullet.dds", this);
 }

@@ -3,7 +3,7 @@
 Bullet::Bullet(const glm::vec3& pos, const glm::vec3& vel, const std::string& textPath, const Object* owner, const glm::vec3& size) :
 	Object(pos, size, textPath, false, Type::Bullet), _owner(owner), _minX(0), _maxX(0), _minY(0), _maxY(0)
 {
-	_vel = vel;
+	Vel(vel);
 }
 
 void Bullet::Update(const double& secondsSinceLastUpdate)
@@ -16,7 +16,7 @@ void Bullet::Update(const double& secondsSinceLastUpdate)
 
 void Bullet::HandleCollision(Object* other)
 {
-	if(other->Type() != Object::Type::Bullet)
+	if(other->Type() != Object::Type::Bullet && other != _owner)
 		_isAlive = false;
 }
 

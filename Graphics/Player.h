@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Object.h"
+#include "Bullet.h"
 
 #include <glm/glm.hpp>
 
@@ -17,11 +18,13 @@ public:
 	void JumpRelease();
 	void MoveLeft();
 	void MoveRight();
+	std::shared_ptr<Bullet> Fire();
 
 protected:
 	unsigned int _jumpsRemaining;
 	double _jumpHoldTimer;
-	bool _wallJumpable, _wallJumpLeft;
+	bool _isJumping, _wallJumpable, _wallJumpLeft;
+	glm::vec3 _curJumpVel;
 	double _wallJumpableCountdown;
 	bool _movingLeft, _movingRight;
 	bool _suspendFriction;
