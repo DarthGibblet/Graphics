@@ -7,7 +7,7 @@ Camera::Camera(const double& maxX, const double& ratio) :
 {
 }
 
-void Camera::Update(const double& secondsSinceLastFrame)
+void Camera::Update(const double& secondsSinceLastFrame, /*out*/std::vector<std::shared_ptr<Object>>& /*objList*/)
 {
 	if(_followedObj)
 		_pos = _followedObj->Pos();

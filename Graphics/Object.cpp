@@ -1,5 +1,7 @@
 #include "Object.h"
 
+#include "Constants.h"
+
 #include <GL/glew.h>
 
 std::map<std::string, std::shared_ptr<Texture>> Object::_textureCache;
@@ -8,17 +10,7 @@ Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& t
 	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true),
 	_facingBackwards(false), _glQueryId(0)
 {
-	auto foundText = _textureCache.find(textPath);
-	if(foundText == std::end(_textureCache))
-	{
-		_text = std::make_shared<Texture>(textPath);
-		_textureCache[textPath] = _text;
-	}
-	else
-	{
-		_text = foundText->second;
-	}
-
+	Text(textPath);
 	glGenQueries(1, &_glQueryId);
 }
 
@@ -27,11 +19,11 @@ Object::~Object()
 	glDeleteQueries(1, &_glQueryId);
 }
 
-void Object::Update(const double& secondsSinceLastUpdate)
+void Object::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std::shared_ptr<Object>>& /*objList*/)
 {
 	if(_falls)
 	{
-		_vel.y -= (float)(6 * secondsSinceLastUpdate);
+		_vel.y -= (float)(GRAVITY_STRENGTH * secondsSinceLastUpdate);
 		if(_vel.y < -10)
 			_vel.y = -10;
 		//_rotAngle += secondsSinceLastUpdate * 150;
@@ -77,12 +69,12 @@ bool Object::DoesCollide(Object* other)
 			glDepthMask(GL_FALSE);
 			glEnable(GL_STENCIL_TEST);
 
-			glStencilFunc(GL_ALWAYS, 1, 1);
+			glStencilFunc(GL_ALWAYS, 1, STENCIL_BUFFER_COLLISION_DETECTION_MASK);
 			glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 			Draw();
 
 			glBeginQuery(GL_SAMPLES_PASSED, _glQueryId);
-			glStencilFunc(GL_EQUAL, 1, 1);
+			glStencilFunc(GL_EQUAL, 1, STENCIL_BUFFER_COLLISION_DETECTION_MASK);
 			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 			other->Draw();
 
@@ -138,9 +130,14 @@ bool Object::UsePreciseCollisions()
 	return _type != Type::Block;
 }
 
-Object::Type::E Object::Type()
+Object::Type::E Object::Type() const
 {
 	return _type;
+}
+
+Object::Type::E Object::OwnerType() const
+{
+	return Type::Generic;
 }
 
 void Object::Vel(const glm::vec3& vel)
@@ -152,27 +149,46 @@ void Object::Vel(const glm::vec3& vel)
 		_facingBackwards = true;
 }
 
-const glm::vec3& Object::Vel()
+const glm::vec3& Object::Vel() const
 {
 	return _vel;
 }
 
-const glm::vec3& Object::Pos()
+const glm::vec3& Object::Pos() const
 {
 	return _pos;
 }
 
-const glm::vec3& Object::PrevPos()
+const glm::vec3& Object::PrevPos() const
 {
 	return _prevPos;
 }
 
-const glm::vec3& Object::Size()
+const glm::vec3& Object::Size() const
 {
 	return _size;
+}
+
+void Object::IsAlive(const bool isAlive)
+{
+	_isAlive = isAlive;
 }
 
 bool Object::IsAlive()
 {
 	return _isAlive;
+}
+
+void Object::Text(const std::string& textPath)
+{
+	auto foundText = _textureCache.find(textPath);
+	if(foundText == std::end(_textureCache))
+	{
+		_text = std::make_shared<Texture>(textPath);
+		_textureCache[textPath] = _text;
+	}
+	else
+	{
+		_text = foundText->second;
+	}
 }

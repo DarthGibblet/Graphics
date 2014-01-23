@@ -1,11 +1,13 @@
 #include "Texture.h"
 #include "Shader.h"
 #include "Object.h"
+#include "Entity.h"
 #include "Player.h"
 #include "Bullet.h"
 #include "Upgrade.h"
 #include "Camera.h"
 #include "Quadtree.h"
+#include "SaveFile.h"
 
 #include <iostream>
 
@@ -20,7 +22,9 @@ bool _useQuadtree = true;
 bool _drawQuadtreeGraph = false;
 bool _pushLeft = false;
 bool _pushRight = false;
+bool _save = false;
 bool _jump = false, _releaseJump = false;
+bool _crouchHold = false, _crouchRelease = false;;
 bool _fire = false;
 bool _shouldClose = false;
 
@@ -54,6 +58,11 @@ void StopRight()
 	_pushRight = false;
 }
 
+void Save()
+{
+	_save = true;
+}
+
 void JumpHold()
 {
 	_jump = true;
@@ -62,6 +71,16 @@ void JumpHold()
 void JumpRelease()
 {
 	_releaseJump = true;
+}
+
+void CrouchHold()
+{
+	_crouchHold = true;
+}
+
+void CrouchRelease()
+{
+	_crouchRelease = true;
 }
 
 void Fire()
@@ -92,11 +111,17 @@ void OnKeyPress(GLFWwindow* /*window*/, int key, int /*scanCode*/, int action, i
 			_keyUpActions[i] = keypress_func_t();
 
 			_keyDownActions[GLFW_KEY_Q] = &ToggleUsingQuadtree;
-			_keyDownActions[GLFW_KEY_D] = &ToggleDrawingQuadtree;
 			_keyDownActions[GLFW_KEY_LEFT] = &PushLeft;
 			_keyUpActions[GLFW_KEY_LEFT] = &StopLeft;
+			_keyDownActions[GLFW_KEY_A] = &PushLeft;
+			_keyUpActions[GLFW_KEY_A] = &StopLeft;
 			_keyDownActions[GLFW_KEY_RIGHT] = &PushRight;
 			_keyUpActions[GLFW_KEY_RIGHT] = &StopRight;
+			_keyDownActions[GLFW_KEY_D] = &PushRight;
+			_keyUpActions[GLFW_KEY_D] = &StopRight;
+			_keyDownActions[GLFW_KEY_DOWN] = &CrouchHold;
+			_keyUpActions[GLFW_KEY_DOWN] = &CrouchRelease;
+			_keyDownActions[GLFW_KEY_S] = &Save;
 			_keyDownActions[GLFW_KEY_SPACE] = &JumpHold;
 			_keyUpActions[GLFW_KEY_SPACE] = &JumpRelease;
 			_keyDownActions[GLFW_KEY_F] = &Fire;
@@ -152,6 +177,10 @@ int main(int argc, char** argv)
 
 	Shader shader("..\\resources\\DemoShader");
 
+	SaveFile save("..\\saves\\autosave.dat");
+	unsigned int upgradeMask = 0;
+	save.Read(upgradeMask);
+
 	const double ZONE_MAX_X = 26, ZONE_MAX_Y = 6;
 
 	vector<std::shared_ptr<Object>> masterList;
@@ -161,7 +190,7 @@ int main(int argc, char** argv)
 	double ratio = (double)frameBufferHeight / frameBufferWidth;
 	Camera cam(10, ratio);
 
-	std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(0, 5, 0));
+	std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(0, 5, 0), upgradeMask);
 
 	cam.Teather(player.get());
 	cam.SetRestrictLeft(-ZONE_MAX_X);
@@ -169,7 +198,7 @@ int main(int argc, char** argv)
 	cam.SetRestrictTop(ZONE_MAX_Y);
 	cam.SetRestrictBottom(-ZONE_MAX_Y);
 
-	auto enemy = std::make_shared<Object>(glm::vec3(-3, -2.5, 0), glm::vec3(5*0.8, 5, 5), "..\\resources\\Gust.dds", false, Object::Type::Enemy);
+	auto enemy = std::make_shared<Entity>(glm::vec3(-3, -4, 0), glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Enemy);
 	enemy->Vel(glm::vec3(0.25, 0, 0));
 
 	//for(int i=0;i<2000;++i)
@@ -195,8 +224,10 @@ int main(int argc, char** argv)
 	masterList.push_back(player);
 	masterList.push_back(enemy);
 	//masterList.push_back(bullet);
-	masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-16, -3, 0), glm::vec3(1, 1, 1), "..\\resources\\WallJump.dds", Upgrade::Type::WALL_JUMP));
-	masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-10, 0, 0), glm::vec3(1, 1, 1), "..\\resources\\DoubleJump.dds", Upgrade::Type::DOUBLE_JUMP));
+	if(!player->HasUpgrade(Upgrade::Type::WALL_JUMP))
+		masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-16, -3, 0), glm::vec3(1, 1, 1), "..\\resources\\WallJump.dds", Upgrade::Type::WALL_JUMP));
+	if(!player->HasUpgrade(Upgrade::Type::DOUBLE_JUMP))
+		masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-10, -0.5, 0), glm::vec3(1, 1, 1), "..\\resources\\DoubleJump.dds", Upgrade::Type::DOUBLE_JUMP));
 	
 	double lastTime = glfwGetTime(), framerateStartTime = lastTime;
 
@@ -250,13 +281,13 @@ int main(int argc, char** argv)
 			{
 				objCollection.Insert(obj.get());
 			});
-			objCollection.Update(timeSinceLastFrame);
+			objCollection.Update(timeSinceLastFrame, masterList);
 			if(_drawQuadtreeGraph)
 				objCollection.Draw();
 		}
 		else
 		{
-			foreach(masterList, std::bind(&Object::Update, std::placeholders::_1, timeSinceLastFrame));
+			foreach(masterList, std::bind(&Object::Update, std::placeholders::_1, timeSinceLastFrame, ref(masterList)));
 
 			for(auto iObj = std::begin(masterList); iObj < std::end(masterList); ++iObj)
 			{
@@ -289,6 +320,16 @@ int main(int argc, char** argv)
 			player->JumpRelease();
 			_releaseJump = false;
 		}
+		if(_crouchHold)
+		{
+			player->CrouchHold();
+			_crouchHold = false;
+		}
+		if(_crouchRelease)
+		{
+			player->CrouchRelease();
+			_crouchRelease = false;
+		}
 		if(_fire)
 		{
 			auto newBullet = player->Fire();
@@ -296,11 +337,23 @@ int main(int argc, char** argv)
 			masterList.push_back(newBullet);
 			_fire = false;
 		}
+		if(_save)
+		{
+			bool saveRes = save.Write(player->GetUpgradeMask());
+			if(saveRes)
+				cout <<"Progress saved to file" <<endl;
+			else
+				cout <<"Error saving progress" <<endl;
+			_save = false;
+		}
 
-		cam.Update(timeSinceLastFrame);
+		cam.Update(timeSinceLastFrame, masterList);
 
 		cam.Draw();
 		foreach(masterList, std::bind(&Object::Draw, std::placeholders::_1));
+
+		if(!player->IsAlive())
+			_shouldClose = true;
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

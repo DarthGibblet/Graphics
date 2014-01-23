@@ -23,10 +23,10 @@ Quadtree::~Quadtree()
 	});
 }
 
-void Quadtree::Update(const double& secondsSinceLastUpdate)
+void Quadtree::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std::shared_ptr<Object>>& objList)
 {
-	foreach(_trackedObjs, std::bind(&Object::Update, std::placeholders::_1, secondsSinceLastUpdate));
-	foreach(_children, std::bind(&Quadtree::Update, std::placeholders::_1, secondsSinceLastUpdate));
+	foreach(_trackedObjs, std::bind(&Object::Update, std::placeholders::_1, secondsSinceLastUpdate, ref(objList)));
+	foreach(_children, std::bind(&Quadtree::Update, std::placeholders::_1, secondsSinceLastUpdate, ref(objList)));
 	CheckCollisions();
 }
 

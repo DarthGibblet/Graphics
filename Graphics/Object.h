@@ -7,6 +7,8 @@
 
 #include <string>
 #include <map>
+#include <vector>
+#include <memory>
 
 class Object
 {
@@ -20,7 +22,7 @@ public:
 	
 	virtual ~Object();
 
-	virtual void Update(const double& secondsSinceLastUpdate);
+	virtual void Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std::shared_ptr<Object>>& objList);
 	virtual void Draw();
 
 	bool DoesCollide(std::shared_ptr<Object> other);
@@ -30,13 +32,16 @@ public:
 	bool IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight);
 	bool UsePreciseCollisions();
 
-	Type::E Type();
+	Type::E Type() const;
+	virtual Type::E OwnerType() const;
 	void Vel(const glm::vec3& vel);
-	const glm::vec3& Vel();
-	const glm::vec3& Pos();
-	const glm::vec3& PrevPos();
-	const glm::vec3& Size();
+	const glm::vec3& Vel() const;
+	const glm::vec3& Pos() const;
+	const glm::vec3& PrevPos() const;
+	const glm::vec3& Size() const;
+	void IsAlive(const bool isAlive);
 	bool IsAlive();
+	void Text(const std::string& textPath);
 protected:
 	glm::vec3 _pos, _size, _rotAxis, _vel;
 	double _rotAngle;
@@ -46,7 +51,6 @@ protected:
 
 	bool _isAlive, _facingBackwards;
 	
-	//Texture _tex;
 	static std::map<std::string, std::shared_ptr<Texture>> _textureCache;
 	std::shared_ptr<Texture> _text;
 	Box _mesh;

@@ -1,89 +1,126 @@
 #include "Player.h"
 #include "Upgrade.h"
 #include "Constants.h"
+#include "Shield.h"
 
-Player::Player(const glm::vec3& pos) : Object(pos, glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player),
-		_jumpsRemaining(0), _isJumping(false), _wallJumpable(false), _movingLeft(false), _movingRight(false), 
-		_suspendFriction(true), _upgradeMask(0)
+Player::Player(const glm::vec3& pos, const unsigned int upgradeMask) : Entity(pos, glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player),
+		_jumpsRemaining(0), _isJumping(false), _wallJumpable(false), _dashTimer(0), _crouching(false), _dashReady(false), _dashing(false), _pendingCrouchRelease(false), 
+		_movingLeft(false), _movingRight(false), _suspendFriction(true), _upgradeMask(upgradeMask)
 {
 }
 
-void Player::Update(const double& secondsSinceLastUpdate)
+void Player::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std::shared_ptr<Object>>& objList)
 {
 	_suspendFriction = false;
-	if(_movingLeft != _movingRight)
-	{
-		if(_movingLeft && _vel.x > -5)
-			Vel(Vel() + glm::vec3(-15 * secondsSinceLastUpdate, 0, 0));
-		if(_movingRight && _vel.x < 5)
-			Vel(Vel() + glm::vec3(15 * secondsSinceLastUpdate, 0, 0));
 
+	if(_dashing)
+	{
+		_dashTimer += secondsSinceLastUpdate;
+		if(_dashTimer >= 0.5)
+		{
+			_dashing = false;
+			_dashTimer = 0;
+			auto newVel = Vel();
+			if(Vel().x < -MAX_PLAYER_WALKING_SPEED)
+				newVel.x = static_cast<float>(-MAX_PLAYER_WALKING_SPEED);
+			else if(Vel().x > MAX_PLAYER_WALKING_SPEED)
+				newVel.x = static_cast<float>(MAX_PLAYER_WALKING_SPEED);
+			Vel(newVel);
+			_shield->IsAlive(false);
+			_shield.reset();
+		}
 		_suspendFriction = true;
 	}
-
-	if(_wallJumpable)
+	else
 	{
-		auto lastWallJumpCountdown = _wallJumpableCountdown;
-		_wallJumpableCountdown -= secondsSinceLastUpdate;
-		if(_wallJumpableCountdown <= 0)
-			_wallJumpable = false;
-	}
-
-	if(_isJumping && _jumpHoldTimer < MAX_JUMP_HOLD_DURATION)
-	{
-		auto tmpJumpVel = _curJumpVel;
-		if(_curJumpVel.x == 0)
+		if(_pendingCrouchRelease)
 		{
-			tmpJumpVel.x = Vel().x;
+			_crouching = false;
+			_pos.y += _size.y/2;
+			_size.y = _size.y * 2;
+			auto newVel = Vel();
+			if(Vel().x < -MAX_PLAYER_WALKING_SPEED)
+				newVel.x = static_cast<float>(-MAX_PLAYER_WALKING_SPEED);
+			else if(Vel().x > MAX_PLAYER_WALKING_SPEED)
+				newVel.x = static_cast<float>(MAX_PLAYER_WALKING_SPEED);
+			Vel(newVel);
+			_pendingCrouchRelease = false;
 		}
-		Vel(tmpJumpVel);
-		_jumpHoldTimer += secondsSinceLastUpdate;
+
+		if(_movingLeft != _movingRight)
+		{
+			if(!_crouching)
+			{
+				if(_movingLeft && Vel().x > -MAX_PLAYER_WALKING_SPEED)
+					Vel(Vel() + glm::vec3(-15 * secondsSinceLastUpdate, 0, 0));
+				if(_movingRight && Vel().x < MAX_PLAYER_WALKING_SPEED)
+					Vel(Vel() + glm::vec3(15 * secondsSinceLastUpdate, 0, 0));
+			}
+			else if(_dashReady)
+			{
+				if(_movingLeft)
+					Vel(glm::vec3(-10, 0, 0));
+				if(_movingRight)
+					Vel(glm::vec3(10, 0, 0));
+				_dashReady = false;
+				_dashTimer = 0;
+				_dashing = true;
+				_shield = std::make_shared<Shield>(this);
+				objList.push_back(_shield);
+			}
+
+			_suspendFriction = true;
+		}
+
+		if(_wallJumpable)
+		{
+			auto lastWallJumpCountdown = _wallJumpableCountdown;
+			_wallJumpableCountdown -= secondsSinceLastUpdate;
+			if(_wallJumpableCountdown <= 0)
+				_wallJumpable = false;
+		}
+
+		if(_isJumping && _jumpHoldTimer < MAX_JUMP_HOLD_DURATION)
+		{
+			auto tmpJumpVel = _curJumpVel;
+			if(_curJumpVel.x == 0)
+			{
+				tmpJumpVel.x = Vel().x;
+			}
+			Vel(tmpJumpVel);
+			_jumpHoldTimer += secondsSinceLastUpdate;
+		}
 	}
 
 	_movingLeft = _movingRight = false;
 
-	Object::Update(secondsSinceLastUpdate);
+	Entity::Update(secondsSinceLastUpdate, objList);
 }
 
 void Player::HandleCollision(Object* other)
 {
+	Entity::HandleCollision(other);
+
 	switch(other->Type())
 	{
 	case Type::Block:
+		if(_doesXCollide && !_doesXCollideLastFrame)
 		{
-			//If we're colliding with a block, then there should be a dimension in which _prevPos wasn't colliding.
-			//  Find which dimension that is, then reset _pos to match _prevPos along that axis.
-			auto doesXCollide = abs(_pos.x - other->Pos().x) < _size.x / 2 + other->Size().x / 2;
-			auto doesYCollide = abs(_pos.y - other->Pos().y) < _size.y / 2 + other->Size().y / 2;
-			auto doesXCollideLastFrame = abs(_prevPos.x - other->PrevPos().x) < _size.x / 2 + other->Size().x / 2;
-			auto doesYCollideLastFrame = abs(_prevPos.y - other->PrevPos().y) < _size.y / 2 + other->Size().y / 2;
-
-			if(doesXCollide && !doesXCollideLastFrame)
-			{
-				_pos.x = _prevPos.x;
-				_pos.y = _prevPos.y;
-				_vel.y = 0;
+			if(_upgradeMask & Upgrade::Type::WALL_JUMP)
+				_wallJumpable = true;
+			_wallJumpableCountdown = 0.5;
+			_wallJumpLeft = _pos.x < other->Pos().x;
+		}
+		if(_doesYCollide && !_doesYCollideLastFrame)
+		{
+			if(!_suspendFriction)
 				_vel.x = 0;
-				if(_upgradeMask & Upgrade::Type::WALL_JUMP)
-					_wallJumpable = true;
-				_wallJumpableCountdown = 0.5;
-				_wallJumpLeft = _pos.x < other->Pos().x;
-			}
-			if(doesYCollide && !doesYCollideLastFrame)
+			if(Pos().y > other->Pos().y)
 			{
-				_pos.y = _prevPos.y;
-				if(!_suspendFriction)
-					_vel.x = 0;
-				_vel.y = 0;
-				if(Pos().y > other->Pos().y)
-					_jumpsRemaining = _upgradeMask & Upgrade::Type::DOUBLE_JUMP ? 2 : 1;
+				_jumpsRemaining = _upgradeMask & Upgrade::Type::DOUBLE_JUMP ? 2 : 1;
+				_dashReady = true;
 			}
 		}
-		break;
-	case Type::Bullet:
-		break;
-	case Type::Enemy:
-		//_isAlive = false;
 		break;
 	case Type::Upgrade:
 		_upgradeMask |= reinterpret_cast<Upgrade*>(other)->Power();
@@ -114,6 +151,31 @@ void Player::JumpRelease()
 	_isJumping = false;
 }
 
+void Player::CrouchHold()
+{
+	if(!_crouching)
+	{
+		_crouching = true;
+		_pos.y -= _size.y / 4;
+		_size.y = _size.y / 2;
+		_pendingCrouchRelease = false;
+	}
+}
+
+void Player::CrouchRelease()
+{
+	_pendingCrouchRelease = true;
+	//_crouching = false;
+	//_pos.y += _size.y/2;
+	//_size.y = _size.y * 2;
+	//glm::vec3 newVel = Vel();
+	//if(Vel().x < -MAX_PLAYER_WALKING_SPEED)
+	//	newVel.x = static_cast<float>(-MAX_PLAYER_WALKING_SPEED);
+	//else if(Vel().x > MAX_PLAYER_WALKING_SPEED)
+	//	newVel.x = static_cast<float>(MAX_PLAYER_WALKING_SPEED);
+	//Vel(newVel);
+}
+
 void Player::MoveLeft()
 {
 	_movingLeft = true;
@@ -128,4 +190,14 @@ std::shared_ptr<Bullet> Player::Fire()
 {
 	glm::vec3 bulletVel(_facingBackwards ? -BULLET_SPEED : BULLET_SPEED, 0, 0);
 	return std::make_shared<Bullet>(_pos, bulletVel, "..\\resources\\Bullet.dds", this);
+}
+
+unsigned Player::GetUpgradeMask() const
+{
+	return _upgradeMask;
+}
+
+bool Player::HasUpgrade(const Upgrade::Type::E& upgrade) const
+{
+	return (_upgradeMask & upgrade) != 0;
 }

@@ -4,13 +4,14 @@
 
 #include <vector>
 #include <functional>
+#include <memory>
 
 class Quadtree
 {
 public:
 	Quadtree(const glm::vec3& pos, const double& width, const double& height, int depth = 0);
 	~Quadtree();
-	void Update(const double& secondsSinceLastUpdate);
+	void Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std::shared_ptr<Object>>& objList);
 	void Draw();
 	void Insert(Object* obj);
 

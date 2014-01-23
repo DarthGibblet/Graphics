@@ -8,7 +8,7 @@ class Camera : public Object
 {
 public:
 	Camera(const double& maxX, const double& ratio);
-	virtual void Update(const double& secondsSinceLastFrame) override;
+	virtual void Update(const double& secondsSinceLastFrame, /*out*/std::vector<std::shared_ptr<Object>>& objList) override;
 	virtual void Draw() override;
 	virtual void Teather(Object* followedObj);
 	//virtual void Restrict(const double& maxXPos, const double maxYPos);
