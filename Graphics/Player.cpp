@@ -1,7 +1,5 @@
 #include "Player.h"
-#include "Upgrade.h"
 #include "Constants.h"
-#include "Shield.h"
 
 Player::Player(const glm::vec3& pos, const unsigned int upgradeMask) : Entity(pos, glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player),
 		_jumpsRemaining(0), _isJumping(false), _wallJumpable(false), _dashTimer(0), _crouching(false), _dashReady(false), _dashing(false), _pendingCrouchRelease(false), 
@@ -33,7 +31,7 @@ void Player::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std
 	}
 	else
 	{
-		if(_pendingCrouchRelease)
+		if(_pendingCrouchRelease && ((_standingClearanceZone && !_standingClearanceZone->IsColliding(Object::Type::Block)) || !_standingClearanceZone))
 		{
 			_crouching = false;
 			_pos.y += _size.y/2;
@@ -45,6 +43,12 @@ void Player::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std
 				newVel.x = static_cast<float>(MAX_PLAYER_WALKING_SPEED);
 			Vel(newVel);
 			_pendingCrouchRelease = false;
+
+			if(_standingClearanceZone)
+			{
+				_standingClearanceZone->IsAlive(false);
+				_standingClearanceZone.reset();
+			}
 		}
 
 		if(_movingLeft != _movingRight)
@@ -67,6 +71,11 @@ void Player::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std
 				_dashing = true;
 				_shield = std::make_shared<Shield>(this);
 				objList.push_back(_shield);
+
+				if(_standingClearanceZone)
+					_standingClearanceZone->IsAlive(false);
+				_standingClearanceZone = std::make_shared<Zone>();
+				objList.push_back(_standingClearanceZone);
 			}
 
 			_suspendFriction = true;
@@ -93,6 +102,16 @@ void Player::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std
 	}
 
 	_movingLeft = _movingRight = false;
+
+	if(_standingClearanceZone)
+	{
+		auto pos = Pos();
+		auto size = Size();
+		pos.y += size.y;
+		_standingClearanceZone->Pos(pos);
+		_standingClearanceZone->Size(size);
+		_standingClearanceZone->Reset();
+	}
 
 	Entity::Update(secondsSinceLastUpdate, objList);
 }
@@ -153,7 +172,7 @@ void Player::JumpRelease()
 
 void Player::CrouchHold()
 {
-	if(!_crouching)
+	if(!_crouching )
 	{
 		_crouching = true;
 		_pos.y -= _size.y / 4;
@@ -165,15 +184,6 @@ void Player::CrouchHold()
 void Player::CrouchRelease()
 {
 	_pendingCrouchRelease = true;
-	//_crouching = false;
-	//_pos.y += _size.y/2;
-	//_size.y = _size.y * 2;
-	//glm::vec3 newVel = Vel();
-	//if(Vel().x < -MAX_PLAYER_WALKING_SPEED)
-	//	newVel.x = static_cast<float>(-MAX_PLAYER_WALKING_SPEED);
-	//else if(Vel().x > MAX_PLAYER_WALKING_SPEED)
-	//	newVel.x = static_cast<float>(MAX_PLAYER_WALKING_SPEED);
-	//Vel(newVel);
 }
 
 void Player::MoveLeft()

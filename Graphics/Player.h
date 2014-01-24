@@ -4,6 +4,7 @@
 #include "Bullet.h"
 #include "Upgrade.h"
 #include "Shield.h"
+#include "Zone.h"
 
 #include <glm/glm.hpp>
 
@@ -43,5 +44,6 @@ protected:
 	unsigned int _upgradeMask;
 
 	std::shared_ptr<Shield> _shield;
+	std::shared_ptr<Zone> _standingClearanceZone;
 
 };

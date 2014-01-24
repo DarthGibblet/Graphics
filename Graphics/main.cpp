@@ -220,6 +220,7 @@ int main(int argc, char** argv)
 	masterList.push_back(std::make_shared<Object>(glm::vec3(3, 0, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));
 	masterList.push_back(std::make_shared<Object>(glm::vec3(-13, -3, 0), glm::vec3(1, 5, 1), std::string(), false, Object::Type::Block));
 	masterList.push_back(std::make_shared<Object>(glm::vec3(-3, 3, 0), glm::vec3(1, 10, 1), std::string(), false, Object::Type::Block));
+	masterList.push_back(std::make_shared<Object>(glm::vec3(10, 3, 0), glm::vec3(1, 15, 1), std::string(), false, Object::Type::Block));
 
 	masterList.push_back(player);
 	masterList.push_back(enemy);

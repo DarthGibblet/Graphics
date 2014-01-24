@@ -159,6 +159,11 @@ const glm::vec3& Object::Pos() const
 	return _pos;
 }
 
+void Object::Pos(const glm::vec3& pos)
+{
+	_pos = pos;
+}
+
 const glm::vec3& Object::PrevPos() const
 {
 	return _prevPos;
@@ -167,6 +172,11 @@ const glm::vec3& Object::PrevPos() const
 const glm::vec3& Object::Size() const
 {
 	return _size;
+}
+
+void Object::Size(const glm::vec3& size)
+{
+	_size = size;
 }
 
 void Object::IsAlive(const bool isAlive)

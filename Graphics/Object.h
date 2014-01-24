@@ -15,7 +15,7 @@ class Object
 public:
 	struct Type
 	{
-		enum E { Generic, Block, Player, Enemy, Bullet, Upgrade, Camera };
+		enum E { Generic, Block, Player, Enemy, Bullet, Upgrade, Camera, END };
 	};
 
 	Object(const glm::vec3& pos, const glm::vec3& size, const std::string& textPath, bool falls, Type::E type);
@@ -37,8 +37,10 @@ public:
 	void Vel(const glm::vec3& vel);
 	const glm::vec3& Vel() const;
 	const glm::vec3& Pos() const;
+	void Pos(const glm::vec3& pos);
 	const glm::vec3& PrevPos() const;
 	const glm::vec3& Size() const;
+	void Size(const glm::vec3& size);
 	void IsAlive(const bool isAlive);
 	bool IsAlive();
 	void Text(const std::string& textPath);
