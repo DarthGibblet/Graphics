@@ -1,65 +1,43 @@
 #include "SaveFile.h"
 
+#include <boost/assign/list_of.hpp>
+
 #include <fstream>
 
-typedef char str_len_t;
-
-template<typename T>
-void Insert(std::ofstream& stream, const T& val)
+SaveFile::SaveFile(const std::string& filePath) : DataFile(filePath, boost::assign::list_of("SAVE"))
 {
-	stream.write(reinterpret_cast<const char*>(&val), sizeof(T));
 }
 
-template<>
-void Insert<std::string>(std::ofstream& stream, const std::string& val)
+bool SaveFile::HandleDataRead(const std::string& /*fileCode*/, std::ifstream& fin, boost::format& /*errorMsg*/)
 {
-	Insert(stream, static_cast<str_len_t>(val.length()));
-	stream.write(val.c_str(), val.length());
+	Extract(fin, _cachedUpgradeMask);
+	return true;
 }
 
-template<typename T>
-void Extract(std::ifstream& stream, T& val)
+bool SaveFile::HandleDataWrite(const std::string& /*fileCode*/, std::ofstream& fout, boost::format& /*errorMsg*/)
 {
-	stream.read(reinterpret_cast<char*>(&val), sizeof(T));
-}
-
-template<>
-void Extract<std::string>(std::ifstream& stream, std::string& val)
-{
-	str_len_t length;
-	Extract(stream, length);
-	val.resize(length);
-	stream.read(&val[0], length);
-}
-
-SaveFile::SaveFile(const std::string& filePath) : _filePath(filePath)
-{
+	Insert(fout, _cachedUpgradeMask);
+	return true;
 }
 
 bool SaveFile::Read(unsigned int& upgradeMask)
 {
-	std::ifstream fin(_filePath, std::ios_base::binary);
-
-	if(!fin.is_open())
+	boost::format errorMsg;
+	if(!ReadInit(errorMsg))
 		return false;
 
-	std::string fileCode;
-	Extract(fin, fileCode);
-	if(fileCode != "SAVE")
-		return false;
+	upgradeMask = _cachedUpgradeMask;
 
-	Extract(fin, upgradeMask);
 	return true;
 }
 
 bool SaveFile::Write(const unsigned int upgradeMask)
 {
-	std::ofstream fout(_filePath, std::ios_base::binary);
+	_cachedUpgradeMask = upgradeMask;
 
-	if(!fout.is_open())
+	boost::format errorMsg;
+	if(!WriteInit("SAVE", errorMsg))
 		return false;
 
-	Insert(fout, std::string("SAVE"));
-	Insert(fout, upgradeMask);
 	return true;
 }

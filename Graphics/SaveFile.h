@@ -1,8 +1,10 @@
 #pragma once
 
+#include "DataFile.h"
+
 #include <string>
 
-class SaveFile
+class SaveFile : public DataFile
 {
 public:
 	SaveFile(const std::string& filePath);
@@ -11,7 +13,10 @@ public:
 	bool Write(const unsigned int upgradeMask);
 
 private:
-	std::string _filePath;
+	bool HandleDataRead(const std::string& fileCode, std::ifstream& fin, boost::format& errorMsg) override;
+	bool HandleDataWrite(const std::string& fileCode, std::ofstream& fout, boost::format& errorMsg) override;
+
+	unsigned int _cachedUpgradeMask;
 
 	static const unsigned int UPGRADE_MASK_OFFSET = 0;
 };

@@ -1,5 +1,7 @@
 #include "Texture.h"
 
+#include <boost/assign/list_of.hpp>
+
 #include <iostream>
 #include <fstream>
 
@@ -8,37 +10,15 @@
 using std::cout;
 using std::endl;
 
-Texture::Texture(const std::string& filePath) : _textureId(0)
+Texture::Texture(const std::string& filePath) : DataFile(filePath, boost::assign::list_of("DDS ")), _textureId(0)
 {
 	boost::format initErrorMsg;
-	if(!Init(filePath, initErrorMsg))
+	if(!ReadInit(initErrorMsg))
 		cout <<initErrorMsg <<endl;
 }
 
-bool Texture::Init(const std::string& filePath, boost::format& errorMsg)
+bool Texture::HandleDataRead(const std::string& /*fileCode*/, std::ifstream& fin, boost::format& errorMsg)
 {
-	if(filePath.empty())
-		return true;
-
-	std::ifstream fin(filePath, std::ios_base::binary);
-
-	if(!fin.is_open())
-	{
-		char errorDetail[128];
-		strerror_s(errorDetail, errno);
-		errorMsg = boost::format("Error opening file: \"%s\": %s") % filePath % errorDetail;
-		return false;
-	}
-
-	//First check to make sure the file is in the expected format
-	char fileCode[4];
-	fin.read(fileCode, 4);
-	if(strncmp(fileCode, "DDS ", 4) != 0)
-	{
-		errorMsg = boost::format("File \"%s\" does not self-identify as a DDS file") % filePath;
-		return false;
-	}
-
 	//Easier to deal with the header as an array of unsigned ints than a raw char buffer
 	const static unsigned int DDS_HEADER_SIZE = 31;
 	unsigned int fileHeader[DDS_HEADER_SIZE];
@@ -64,7 +44,7 @@ bool Texture::Init(const std::string& filePath, boost::format& errorMsg)
 		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 		break;
 	default:
-		errorMsg = boost::format("File \"%s\" uses an unrecognized fourCC: %d") % filePath % fourCC;
+		errorMsg = boost::format("File \"%s\" uses an unrecognized fourCC: %d") % _filePath % fourCC;
 		return false;
 	}
 
