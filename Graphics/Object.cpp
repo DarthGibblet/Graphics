@@ -6,6 +6,13 @@
 
 std::map<std::string, std::shared_ptr<Texture>> Object::_textureCache;
 
+Object::Object() : _rotAxis(0, 1, 0), _rotAngle(0), _falls(false), _type(Object::Type::Generic), _isAlive(true),
+	_facingBackwards(false), _glQueryId(0)
+{
+	Text("");
+	glGenQueries(1, &_glQueryId);
+}
+
 Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& textPath, bool falls, Type::E type) : 
 	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true),
 	_facingBackwards(false), _glQueryId(0)
@@ -201,4 +208,20 @@ void Object::Text(const std::string& textPath)
 	{
 		_text = foundText->second;
 	}
+}
+
+bool Object::StreamInsert(std::ofstream& stream) const
+{
+	DataFile::InsertAs<int32_t>(stream, _type);
+	DataFile::Insert(stream, _pos);
+	DataFile::Insert(stream, _size);
+	return true;
+}
+
+bool Object::StreamExtract(std::ifstream& stream)
+{
+	DataFile::ExtractAs<int32_t>(stream, _type);
+	DataFile::Extract(stream, _pos);
+	DataFile::Extract(stream, _size);
+	return true;
 }

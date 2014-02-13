@@ -18,6 +18,7 @@ public:
 		enum E { Generic, Block, Player, Enemy, Bullet, Upgrade, Camera, END };
 	};
 
+	Object();
 	Object(const glm::vec3& pos, const glm::vec3& size, const std::string& textPath, bool falls, Type::E type);
 	
 	virtual ~Object();
@@ -44,6 +45,9 @@ public:
 	void IsAlive(const bool isAlive);
 	bool IsAlive();
 	void Text(const std::string& textPath);
+
+	bool StreamInsert(std::ofstream& stream) const;
+	bool StreamExtract(std::ifstream& stream);
 protected:
 	glm::vec3 _pos, _size, _rotAxis, _vel;
 	double _rotAngle;
