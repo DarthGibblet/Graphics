@@ -20,12 +20,21 @@ void Environment::Edit()
 	boost::format errorMsg;
 	ReadInit(errorMsg);
 	//_objList.push_back(std::make_shared<Object>());
+	//_enemyList.push_back(std::make_pair(0, Object::Core()));
 	WriteInit("ENV0", errorMsg);
 }
 
-std::vector<std::shared_ptr<Object>> Environment::GetObjs()
+void Environment::Read(std::vector<std::shared_ptr<Object>>& objList)
 {
-	return _objList;
+	foreach(_objList, [&objList](const Object::Core& objCore)
+	{
+		objList.push_back(std::make_shared<Object>(objCore));
+	});
+
+	foreach(_enemyList, [&objList](const enemy_desc_t& enemyDesc)
+	{
+		objList.push_back(std::make_shared<Entity>(static_cast<Object::EnemyType::E>(enemyDesc.first), enemyDesc.second));
+	});
 }
 
 bool Environment::HandleDataRead(const std::string& fileCode, std::ifstream& fin, boost::format& errorMsg)
@@ -34,6 +43,7 @@ bool Environment::HandleDataRead(const std::string& fileCode, std::ifstream& fin
 
 	rv &= Extract(fin, _exData);
 	rv &= Extract(fin, _objList);
+	rv &= Extract(fin, _enemyList);
 
 	if(!rv)
 	{
@@ -49,6 +59,7 @@ bool Environment::HandleDataWrite(const std::string& fileCode, std::ofstream& fo
 
 	rv &= Insert(fout, _exData);
 	rv &= Insert(fout, _objList);
+	rv &= Insert(fout, _enemyList);
 
 	if(!rv)
 	{

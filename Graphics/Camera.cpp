@@ -10,16 +10,16 @@ Camera::Camera(const double& maxX, const double& ratio) :
 void Camera::Update(const double& secondsSinceLastFrame, /*out*/std::vector<std::shared_ptr<Object>>& /*objList*/)
 {
 	if(_followedObj)
-		_pos = _followedObj->Pos();
+		Pos(_followedObj->Pos());
 
-	if(_pos.x - _maxX < _restrictLeft)
-		_pos.x = static_cast<float>(_restrictLeft + _maxX);
-	if(_pos.x + _maxX > _restrictRight)
-		_pos.x = static_cast<float>(_restrictRight - _maxX);
-	if(_pos.y + _maxY > _restrictTop)
-		_pos.y = static_cast<float>(_restrictTop - _maxY);
-	if(_pos.y - _maxY < _restrictBottom)
-		_pos.y = static_cast<float>(_restrictBottom + _maxY);
+	if(Pos().x - _maxX < _restrictLeft)
+		_core._pos.x = static_cast<float>(_restrictLeft + _maxX);
+	if(Pos().x + _maxX > _restrictRight)
+		_core._pos.x = static_cast<float>(_restrictRight - _maxX);
+	if(Pos().y + _maxY > _restrictTop)
+		_core._pos.y = static_cast<float>(_restrictTop - _maxY);
+	if(Pos().y - _maxY < _restrictBottom)
+		_core._pos.y = static_cast<float>(_restrictBottom + _maxY);
 }
 
 void Camera::Draw()
@@ -27,7 +27,7 @@ void Camera::Draw()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-_maxX, _maxX, -_maxY, _maxY, 10, -10);
-	glTranslated(-_pos.x, -_pos.y, -_pos.z);
+	glTranslated(-Pos().x, -Pos().y, -Pos().z);
 }
 
 void Camera::Teather(Object* followedObj)

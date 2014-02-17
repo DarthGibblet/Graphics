@@ -19,6 +19,9 @@
     <Filter Include="Source Files\MeshTypes">
       <UniqueIdentifier>{f1b55cd4-ce99-4f2b-8d63-a9bdd82c04c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Environments">
+      <UniqueIdentifier>{a3ac1c71-d872-4154-ab14-b863d75f2d17}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -75,6 +78,21 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\resources\Gust.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resources\Bar.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resources\Bullet.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resources\DoubleJump.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resources\Shield.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resources\WallJump.dds">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
@@ -137,6 +155,9 @@
     </None>
     <None Include="..\resources\DemoShader.vp">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\resources\environments\start.env">
+      <Filter>Resource Files\Environments</Filter>
     </None>
   </ItemGroup>
 </Project>

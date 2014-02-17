@@ -18,7 +18,25 @@ public:
 		enum E { Generic, Block, Player, Enemy, Bullet, Upgrade, Camera, END };
 	};
 
+	struct EnemyType
+	{
+		enum E { Generic, Tornado, END };
+	};
+
+	struct Core
+	{
+		Core();
+		Core(const Object::Type::E& type, const glm::vec3& pos, const glm::vec3& size);
+
+		bool StreamInsert(std::ofstream& stream) const;
+		bool StreamExtract(std::ifstream& stream);
+
+		Type::E _type;
+		glm::vec3 _pos, _size, _vel;
+	};
+
 	Object();
+	Object(const Object::Core& core);
 	Object(const glm::vec3& pos, const glm::vec3& size, const std::string& textPath, bool falls, Type::E type);
 	
 	virtual ~Object();
@@ -33,8 +51,8 @@ public:
 	bool IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight);
 	bool UsePreciseCollisions();
 
-	Type::E Type() const;
-	virtual Type::E OwnerType() const;
+	Object::Type::E Type() const;
+	virtual Object::Type::E OwnerType() const;
 	void Vel(const glm::vec3& vel);
 	const glm::vec3& Vel() const;
 	const glm::vec3& Pos() const;
@@ -49,11 +67,11 @@ public:
 	bool StreamInsert(std::ofstream& stream) const;
 	bool StreamExtract(std::ifstream& stream);
 protected:
-	glm::vec3 _pos, _size, _rotAxis, _vel;
+	Core _core;
+	glm::vec3 _rotAxis, _vel;
 	double _rotAngle;
 	bool _falls;
 	glm::vec3 _prevPos;
-	Type::E _type;
 
 	bool _isAlive, _facingBackwards;
 	

@@ -34,8 +34,8 @@ void Player::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std
 		if(_pendingCrouchRelease && ((_standingClearanceZone && !_standingClearanceZone->IsColliding(Object::Type::Block)) || !_standingClearanceZone))
 		{
 			_crouching = false;
-			_pos.y += _size.y/2;
-			_size.y = _size.y * 2;
+			_core._pos.y += _core._size.y/2;
+			_core._size.y = _core._size.y * 2;
 			auto newVel = Vel();
 			if(Vel().x < -MAX_PLAYER_WALKING_SPEED)
 				newVel.x = static_cast<float>(-MAX_PLAYER_WALKING_SPEED);
@@ -122,13 +122,13 @@ void Player::HandleCollision(Object* other)
 
 	switch(other->Type())
 	{
-	case Type::Block:
+	case Object::Type::Block:
 		if(_doesXCollide && !_doesXCollideLastFrame)
 		{
 			if(_upgradeMask & Upgrade::Type::WALL_JUMP)
 				_wallJumpable = true;
 			_wallJumpableCountdown = 0.5;
-			_wallJumpLeft = _pos.x < other->Pos().x;
+			_wallJumpLeft = Pos().x < other->Pos().x;
 		}
 		if(_doesYCollide && !_doesYCollideLastFrame)
 		{
@@ -141,7 +141,7 @@ void Player::HandleCollision(Object* other)
 			}
 		}
 		break;
-	case Type::Upgrade:
+	case Object::Type::Upgrade:
 		_upgradeMask |= reinterpret_cast<Upgrade*>(other)->Power();
 		break;
 	}
@@ -175,8 +175,8 @@ void Player::CrouchHold()
 	if(!_crouching )
 	{
 		_crouching = true;
-		_pos.y -= _size.y / 4;
-		_size.y = _size.y / 2;
+		_core._pos.y -= _core._size.y / 4;
+		_core._size.y = _core._size.y / 2;
 		_pendingCrouchRelease = false;
 	}
 }
@@ -199,7 +199,7 @@ void Player::MoveRight()
 std::shared_ptr<Bullet> Player::Fire()
 {
 	glm::vec3 bulletVel(_facingBackwards ? -BULLET_SPEED : BULLET_SPEED, 0, 0);
-	return std::make_shared<Bullet>(_pos, bulletVel, "..\\resources\\Bullet.dds", this);
+	return std::make_shared<Bullet>(Pos(), bulletVel, "..\\resources\\Bullet.dds", this);
 }
 
 unsigned Player::GetUpgradeMask() const

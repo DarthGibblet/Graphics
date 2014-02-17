@@ -8,7 +8,7 @@ Bullet::Bullet(const glm::vec3& pos, const glm::vec3& vel, const std::string& te
 
 void Bullet::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std::shared_ptr<Object>>& objList)
 {
-	if(_pos.x < _minX || _pos.x > _maxX || _pos.y < _minY || _pos.y > _maxY)
+	if(Pos().x < _minX || Pos().x > _maxX || Pos().y < _minY || Pos().y > _maxY)
 		_isAlive = false;
 
 	Object::Update(secondsSinceLastUpdate, objList);

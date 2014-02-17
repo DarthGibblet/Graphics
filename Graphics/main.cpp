@@ -187,7 +187,8 @@ int main(int argc, char** argv)
 
 	const double ZONE_MAX_X = 26, ZONE_MAX_Y = 6;
 
-	vector<std::shared_ptr<Object>> masterList = curEnv.GetObjs();
+	vector<std::shared_ptr<Object>> masterList;
+	curEnv.Read(masterList);
 
 	int frameBufferWidth, frameBufferHeight;
 	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
@@ -201,9 +202,6 @@ int main(int argc, char** argv)
 	cam.SetRestrictRight(ZONE_MAX_X);
 	cam.SetRestrictTop(ZONE_MAX_Y);
 	cam.SetRestrictBottom(-ZONE_MAX_Y);
-
-	auto enemy = std::make_shared<Entity>(glm::vec3(-3, -4, 0), glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Enemy);
-	enemy->Vel(glm::vec3(0.25, 0, 0));
 
 	//for(int i=0;i<2000;++i)
 	//{
@@ -220,7 +218,6 @@ int main(int argc, char** argv)
 	//std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-6, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Bullet.dds", player.get());
 
 	masterList.push_back(player);
-	masterList.push_back(enemy);
 	//masterList.push_back(bullet);
 	if(!player->HasUpgrade(Upgrade::Type::WALL_JUMP))
 		masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-16, -3, 0), glm::vec3(1, 1, 1), "..\\resources\\WallJump.dds", Upgrade::Type::WALL_JUMP));

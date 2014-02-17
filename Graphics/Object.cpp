@@ -6,7 +6,42 @@
 
 std::map<std::string, std::shared_ptr<Texture>> Object::_textureCache;
 
-Object::Object() : _rotAxis(0, 1, 0), _rotAngle(0), _falls(false), _type(Object::Type::Generic), _isAlive(true),
+Object::Core::Core() :
+	_type(Object::Type::Generic), _pos(0, 0, 0), _size(1, 1, 1), _vel(0, 0, 0)
+{
+}
+
+Object::Core::Core(const Object::Type::E& type, const glm::vec3& pos, const glm::vec3& size) :
+	_type(type), _pos(pos), _size(size)
+{
+}
+
+bool Object::Core::StreamInsert(std::ofstream& stream) const
+{
+	bool rv = true;
+	rv &= DataFile::Insert(stream, _type);
+	rv &= DataFile::Insert(stream, _pos);
+	rv &= DataFile::Insert(stream, _size);
+	return rv;
+}
+
+bool Object::Core::StreamExtract(std::ifstream& stream)
+{
+	bool rv = true;
+	rv &= DataFile::Extract(stream, _type);
+	rv &= DataFile::Extract(stream, _pos);
+	rv &= DataFile::Extract(stream, _size);
+	return rv;
+}
+
+Object::Object() : _rotAxis(0, 1, 0), _rotAngle(0), _falls(false), _isAlive(true),
+	_facingBackwards(false), _glQueryId(0)
+{
+	Text("");
+	glGenQueries(1, &_glQueryId);
+}
+
+Object::Object(const Object::Core& core) : _core(core), _rotAxis(0, 1, 0), _rotAngle(0), _falls(false), _isAlive(true),
 	_facingBackwards(false), _glQueryId(0)
 {
 	Text("");
@@ -14,7 +49,7 @@ Object::Object() : _rotAxis(0, 1, 0), _rotAngle(0), _falls(false), _type(Object:
 }
 
 Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& textPath, bool falls, Type::E type) : 
-	_pos(pos), _size(size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _type(type), _isAlive(true),
+	_core(type, pos, size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _isAlive(true),
 	_facingBackwards(false), _glQueryId(0)
 {
 	Text(textPath);
@@ -36,17 +71,17 @@ void Object::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std
 		//_rotAngle += secondsSinceLastUpdate * 150;
 	}
 
-	_prevPos = _pos;
-	_pos += _vel * (float)secondsSinceLastUpdate;
+	_prevPos = Pos();
+	_core._pos += _vel * (float)secondsSinceLastUpdate;
 }
 
 void Object::Draw()
 {
 	auto texHolder = _text->ActivateScoped();
 	glPushMatrix();
-	glTranslatef(_pos.x, _pos.y, _pos.z);
+	glTranslatef(Pos().x, Pos().y, Pos().z);
 	glRotatef((float)_rotAngle, _rotAxis.x, _rotAxis.y, _rotAxis.z);
-	glScalef(_size.x, _size.y, _size.z);
+	glScalef(Size().x, Size().y, Size().z);
 	_mesh.Draw(_facingBackwards);
 	glPopMatrix();
 }
@@ -61,9 +96,9 @@ bool Object::DoesCollide(Object* other)
 	if(Type() == Object::Type::Bullet && other->Type() == Object::Type::Bullet)
 		return false;
 
-	if(abs(_pos.x - other->_pos.x) < _size.x / 2 + other->_size.x / 2)
+	if(abs(Pos().x - other->Pos().x) < Size().x / 2 + other->Size().x / 2)
 	{
-		if(abs(_pos.y - other->_pos.y) < _size.y / 2 + other->_size.y / 2)
+		if(abs(Pos().y - other->Pos().y) < Size().y / 2 + other->Size().y / 2)
 		{
 			//Sometimes (eg when colliding with the envoronment), we don't want pixel-perfect collisions. In that case, 
 			//  just having the bounding boxes collide is enough
@@ -107,12 +142,12 @@ void Object::HandleCollision(std::shared_ptr<Object> other)
 
 void Object::HandleCollision(Object* other)
 {
-	switch(_type)
+	switch(Type())
 	{
 	case Type::Block:
 		break;
 	case Type::Enemy:
-		switch(other->_type)
+		switch(other->Type())
 		{
 		case Type::Bullet:
 			//_isAlive = false;
@@ -124,22 +159,22 @@ void Object::HandleCollision(Object* other)
 
 bool Object::IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight)
 {
-	if(	_pos.x - _size.x / 2 >= boxCenter.x - boxWidth / 2 &&
-		_pos.x + _size.x / 2 <= boxCenter.x + boxWidth / 2 &&
-		_pos.y - _size.y / 2 >= boxCenter.y - boxHeight / 2 &&
-		_pos.y + _size.y / 2 <= boxCenter.y + boxHeight / 2)
+	if(	Pos().x - Size().x / 2 >= boxCenter.x - boxWidth / 2 &&
+		Pos().x + Size().x / 2 <= boxCenter.x + boxWidth / 2 &&
+		Pos().y - Size().y / 2 >= boxCenter.y - boxHeight / 2 &&
+		Pos().y + Size().y / 2 <= boxCenter.y + boxHeight / 2)
 		return true;
 	return false;
 }
 
 bool Object::UsePreciseCollisions()
 {
-	return _type != Type::Block;
+	return Type() != Type::Block;
 }
 
 Object::Type::E Object::Type() const
 {
-	return _type;
+	return _core._type;
 }
 
 Object::Type::E Object::OwnerType() const
@@ -163,12 +198,12 @@ const glm::vec3& Object::Vel() const
 
 const glm::vec3& Object::Pos() const
 {
-	return _pos;
+	return _core._pos;
 }
 
 void Object::Pos(const glm::vec3& pos)
 {
-	_pos = pos;
+	_core._pos = pos;
 }
 
 const glm::vec3& Object::PrevPos() const
@@ -178,12 +213,12 @@ const glm::vec3& Object::PrevPos() const
 
 const glm::vec3& Object::Size() const
 {
-	return _size;
+	return _core._size;
 }
 
 void Object::Size(const glm::vec3& size)
 {
-	_size = size;
+	_core._size = size;
 }
 
 void Object::IsAlive(const bool isAlive)
@@ -212,16 +247,10 @@ void Object::Text(const std::string& textPath)
 
 bool Object::StreamInsert(std::ofstream& stream) const
 {
-	DataFile::InsertAs<int32_t>(stream, _type);
-	DataFile::Insert(stream, _pos);
-	DataFile::Insert(stream, _size);
-	return true;
+	return DataFile::Insert(stream, _core);
 }
 
 bool Object::StreamExtract(std::ifstream& stream)
 {
-	DataFile::ExtractAs<int32_t>(stream, _type);
-	DataFile::Extract(stream, _pos);
-	DataFile::Extract(stream, _size);
-	return true;
+	return DataFile::Extract(stream, _core);
 }

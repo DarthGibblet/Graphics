@@ -81,7 +81,12 @@
     <ClCompile Include="Zone.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\resources\Bar.dds" />
+    <Image Include="..\resources\Bullet.dds" />
+    <Image Include="..\resources\DoubleJump.dds" />
     <Image Include="..\resources\Gust.dds" />
+    <Image Include="..\resources\Shield.dds" />
+    <Image Include="..\resources\WallJump.dds" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Box.h" />
@@ -105,6 +110,7 @@
   <ItemGroup>
     <None Include="..\resources\DemoShader.fp" />
     <None Include="..\resources\DemoShader.vp" />
+    <None Include="..\resources\environments\start.env" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
