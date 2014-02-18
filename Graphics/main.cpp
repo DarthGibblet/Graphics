@@ -176,8 +176,6 @@ int main(int argc, char** argv)
 	glEnable(GL_STENCIL);
 	glEnable(GL_STENCIL_TEST);
 
-	Shader shader("..\\resources\\DemoShader");
-
 	SaveFile save("..\\saves\\autosave.dat");
 	unsigned int upgradeMask = 0;
 	save.Read(upgradeMask);
@@ -234,7 +232,7 @@ int main(int argc, char** argv)
 		double timeSinceLastFrame = curTime - lastTime;
 		lastTime = curTime;
 
-		//Really quick hack to get rid of those pesky weird case frames (like window resizing/moving, pausing in a debugger, things like that
+		//Really quick hack to get rid of those pesky weird case frames (like window resizing/moving, pausing in a debugger, things like that)
 		if(timeSinceLastFrame > 1)
 			continue;
 
@@ -252,6 +250,8 @@ int main(int argc, char** argv)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glUseProgram(0);
+
+		//shader.Activate();
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();

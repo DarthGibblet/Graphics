@@ -5,6 +5,7 @@ Player::Player(const glm::vec3& pos, const unsigned int upgradeMask) : Entity(po
 		_jumpsRemaining(0), _isJumping(false), _wallJumpable(false), _dashTimer(0), _crouching(false), _dashReady(false), _dashing(false), _pendingCrouchRelease(false), 
 		_movingLeft(false), _movingRight(false), _suspendFriction(true), _upgradeMask(upgradeMask)
 {
+	_shader = std::make_shared<Shader>("..\\resources\\Neon");
 }
 
 void Player::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std::shared_ptr<Object>>& objList)

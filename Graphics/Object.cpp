@@ -78,6 +78,9 @@ void Object::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std
 void Object::Draw()
 {
 	auto texHolder = _text->ActivateScoped();
+	std::shared_ptr<ResourceHolder> shaderHolder;
+	if(_shader)
+		shaderHolder = _shader->ActivateScoped();
 	glPushMatrix();
 	glTranslatef(Pos().x, Pos().y, Pos().z);
 	glRotatef((float)_rotAngle, _rotAxis.x, _rotAxis.y, _rotAxis.z);

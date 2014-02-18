@@ -159,5 +159,11 @@
     <None Include="..\resources\environments\start.env">
       <Filter>Resource Files\Environments</Filter>
     </None>
+    <None Include="..\resources\Neon.fp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\resources\Neon.vp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

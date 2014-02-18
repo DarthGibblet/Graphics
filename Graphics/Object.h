@@ -2,6 +2,7 @@
 
 #include "Box.h"
 #include "Texture.h"
+#include "Shader.h"
 
 #include <glm/glm.hpp>
 
@@ -77,6 +78,7 @@ protected:
 	
 	static std::map<std::string, std::shared_ptr<Texture>> _textureCache;
 	std::shared_ptr<Texture> _text;
+	std::shared_ptr<Shader> _shader;
 	Box _mesh;
 	GLuint _glQueryId;
 };
