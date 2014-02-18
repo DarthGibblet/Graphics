@@ -3,6 +3,8 @@
 #include "DataFile.h"
 #include "Object.h"
 #include "Entity.h"
+#include "Upgrade.h"
+#include "Player.h"
 
 #include <string>
 #include <vector>
@@ -14,7 +16,7 @@ public:
 
 	Environment(const std::string& filePath);
 
-	void Read(std::vector<std::shared_ptr<Object>>& objList);
+	void Read(std::vector<std::shared_ptr<Object>>& objList, std::shared_ptr<Player> player);
 	void Edit();
 
 protected:
@@ -22,8 +24,10 @@ protected:
 	bool HandleDataWrite(const std::string& fileCode, std::ofstream& fout, boost::format& errorMsg) override;
 
 	typedef std::pair<Object::EnemyType::E, Object::Core> enemy_desc_t;
+	typedef std::pair<Upgrade::Type::E, Object::Core> upgrade_desc_t;
 
 	uint64_t _exData;
 	std::vector<Object::Core> _objList;
 	std::vector<enemy_desc_t> _enemyList;
+	std::vector<upgrade_desc_t> _upgradeList;
 };

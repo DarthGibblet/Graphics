@@ -10,6 +10,7 @@ public:
 		enum E { WALL_JUMP = 1, DOUBLE_JUMP = 2 };
 	};
 
+	Upgrade(const Upgrade::Type::E& type, const Object::Core& core); 
 	Upgrade(const glm::vec3& pos, const glm::vec3& size, const std::string& textPath, Upgrade::Type::E power);
 
 	virtual void HandleCollision(Object* other) override;

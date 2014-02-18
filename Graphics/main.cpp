@@ -185,15 +185,15 @@ int main(int argc, char** argv)
 
 	const double ZONE_MAX_X = 26, ZONE_MAX_Y = 6;
 
+	std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(0, 5, 0), upgradeMask);
+
 	vector<std::shared_ptr<Object>> masterList;
-	curEnv.Read(masterList);
+	curEnv.Read(masterList, player);
 
 	int frameBufferWidth, frameBufferHeight;
 	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
 	double ratio = (double)frameBufferHeight / frameBufferWidth;
 	Camera cam(10, ratio);
-
-	std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(0, 5, 0), upgradeMask);
 
 	cam.Teather(player.get());
 	cam.SetRestrictLeft(-ZONE_MAX_X);
@@ -216,11 +216,6 @@ int main(int argc, char** argv)
 	//std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-6, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Bullet.dds", player.get());
 
 	masterList.push_back(player);
-	//masterList.push_back(bullet);
-	if(!player->HasUpgrade(Upgrade::Type::WALL_JUMP))
-		masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-16, -3, 0), glm::vec3(1, 1, 1), "..\\resources\\WallJump.dds", Upgrade::Type::WALL_JUMP));
-	if(!player->HasUpgrade(Upgrade::Type::DOUBLE_JUMP))
-		masterList.push_back(std::make_shared<Upgrade>(glm::vec3(-10, -0.5, 0), glm::vec3(1, 1, 1), "..\\resources\\DoubleJump.dds", Upgrade::Type::DOUBLE_JUMP));
 	
 	double lastTime = glfwGetTime(), framerateStartTime = lastTime;
 
