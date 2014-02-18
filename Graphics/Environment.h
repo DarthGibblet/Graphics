@@ -19,6 +19,9 @@ public:
 	void Read(std::vector<std::shared_ptr<Object>>& objList, std::shared_ptr<Player> player);
 	void Edit();
 
+	float MaxX() const;
+	float MaxY() const;
+
 protected:
 	bool HandleDataRead(const std::string& fileCode, std::ifstream& fin, boost::format& errorMsg) override;
 	bool HandleDataWrite(const std::string& fileCode, std::ofstream& fout, boost::format& errorMsg) override;
@@ -27,6 +30,7 @@ protected:
 	typedef std::pair<Upgrade::Type::E, Object::Core> upgrade_desc_t;
 
 	uint64_t _exData;
+	float _maxX, _maxY;
 	std::vector<Object::Core> _objList;
 	std::vector<enemy_desc_t> _enemyList;
 	std::vector<upgrade_desc_t> _upgradeList;

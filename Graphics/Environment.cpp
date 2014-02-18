@@ -44,11 +44,23 @@ void Environment::Read(std::vector<std::shared_ptr<Object>>& objList, std::share
 	});
 }
 
+float Environment::MaxX() const
+{
+	return _maxX;
+}
+
+float Environment::MaxY() const
+{
+	return _maxY;
+}
+
 bool Environment::HandleDataRead(const std::string& fileCode, std::ifstream& fin, boost::format& errorMsg)
 {
 	bool rv = true;
 
 	rv &= Extract(fin, _exData);
+	rv &= Extract(fin, _maxX);
+	rv &= Extract(fin, _maxY);
 	rv &= Extract(fin, _objList);
 	rv &= Extract(fin, _enemyList);
 	rv &= Extract(fin, _upgradeList);
@@ -66,6 +78,8 @@ bool Environment::HandleDataWrite(const std::string& fileCode, std::ofstream& fo
 	bool rv = true;
 
 	rv &= Insert(fout, _exData);
+	rv &= Insert(fout, _maxX);
+	rv &= Insert(fout, _maxY);
 	rv &= Insert(fout, _objList);
 	rv &= Insert(fout, _enemyList);
 	rv &= Insert(fout, _upgradeList);

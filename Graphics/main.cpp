@@ -183,8 +183,6 @@ int main(int argc, char** argv)
 	Environment curEnv("..\\resources\\environments\\start.env");
 	curEnv.Edit();
 
-	const double ZONE_MAX_X = 26, ZONE_MAX_Y = 6;
-
 	std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(0, 5, 0), upgradeMask);
 
 	vector<std::shared_ptr<Object>> masterList;
@@ -196,10 +194,10 @@ int main(int argc, char** argv)
 	Camera cam(10, ratio);
 
 	cam.Teather(player.get());
-	cam.SetRestrictLeft(-ZONE_MAX_X);
-	cam.SetRestrictRight(ZONE_MAX_X);
-	cam.SetRestrictTop(ZONE_MAX_Y);
-	cam.SetRestrictBottom(-ZONE_MAX_Y);
+	cam.SetRestrictLeft(-curEnv.MaxX());
+	cam.SetRestrictRight(curEnv.MaxX());
+	cam.SetRestrictTop(curEnv.MaxY());
+	cam.SetRestrictBottom(-curEnv.MaxY());
 
 	//for(int i=0;i<2000;++i)
 	//{
@@ -246,8 +244,6 @@ int main(int argc, char** argv)
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glUseProgram(0);
 
-		//shader.Activate();
-
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 
@@ -266,7 +262,7 @@ int main(int argc, char** argv)
 		if(_useQuadtree)
 		{
 			//TODO*** - Have logic to maintain a constant QuadTree object between frames and only re-insert the objects that have moved since the last frame
-			Quadtree objCollection(glm::vec3(0, 0, 0), ZONE_MAX_X * 2, ZONE_MAX_Y * 2);
+			Quadtree objCollection(glm::vec3(0, 0, 0), curEnv.MaxX() * 2, curEnv.MaxY() * 2);
 			std::for_each(std::begin(masterList), std::end(masterList), [&objCollection](decltype(*std::begin(masterList)) obj)
 			{
 				objCollection.Insert(obj.get());
@@ -323,7 +319,7 @@ int main(int argc, char** argv)
 		if(_fire)
 		{
 			auto newBullet = player->Fire();
-			newBullet->SetBounds(-ZONE_MAX_X, ZONE_MAX_X, -ZONE_MAX_Y, ZONE_MAX_Y);
+			newBullet->SetBounds(-curEnv.MaxX(), curEnv.MaxX(), -curEnv.MaxY(), curEnv.MaxY());
 			masterList.push_back(newBullet);
 			_fire = false;
 		}
