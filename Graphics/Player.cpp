@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "Constants.h"
 
-Player::Player(const glm::vec3& pos, const unsigned int upgradeMask) : Entity(pos, glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player),
+Player::Player(const unsigned int upgradeMask) : Entity(glm::vec3(0, 0, 0), glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player),
 		_jumpsRemaining(0), _isJumping(false), _wallJumpable(false), _dashTimer(0), _crouching(false), _dashReady(false), _dashing(false), _pendingCrouchRelease(false), 
 		_movingLeft(false), _movingRight(false), _suspendFriction(true), _upgradeMask(upgradeMask)
 {

@@ -14,7 +14,7 @@ class Player : public Entity
 {
 public:
 
-	Player(const glm::vec3& pos, const unsigned int upgradeMask);
+	Player(const unsigned int upgradeMask);
 
 	virtual void Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std::shared_ptr<Object>>& objList) override;
 	virtual void HandleCollision(Object* other) override;

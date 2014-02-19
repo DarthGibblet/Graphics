@@ -5,6 +5,7 @@
 #include "Entity.h"
 #include "Upgrade.h"
 #include "Player.h"
+#include "Camera.h"
 
 #include <string>
 #include <vector>
@@ -16,7 +17,7 @@ public:
 
 	Environment(const std::string& filePath);
 
-	void Read(std::vector<std::shared_ptr<Object>>& objList, std::shared_ptr<Player> player);
+	void Read(std::vector<std::shared_ptr<Object>>& objList, std::shared_ptr<Player> player, const uint32_t& entranceId, std::shared_ptr<Camera> cam);
 	void Edit();
 
 	float MaxX() const;
@@ -34,4 +35,5 @@ protected:
 	std::vector<Object::Core> _objList;
 	std::vector<enemy_desc_t> _enemyList;
 	std::vector<upgrade_desc_t> _upgradeList;
+	std::vector<glm::vec3> _spawnPointList;
 };

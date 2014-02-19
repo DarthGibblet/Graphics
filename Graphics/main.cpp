@@ -183,21 +183,19 @@ int main(int argc, char** argv)
 	Environment curEnv("..\\resources\\environments\\start.env");
 	curEnv.Edit();
 
-	std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(0, 5, 0), upgradeMask);
-
-	vector<std::shared_ptr<Object>> masterList;
-	curEnv.Read(masterList, player);
+	auto player = std::make_shared<Player>(upgradeMask);
 
 	int frameBufferWidth, frameBufferHeight;
 	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
 	double ratio = (double)frameBufferHeight / frameBufferWidth;
-	Camera cam(10, ratio);
-
-	cam.Teather(player.get());
-	cam.SetRestrictLeft(-curEnv.MaxX());
-	cam.SetRestrictRight(curEnv.MaxX());
-	cam.SetRestrictTop(curEnv.MaxY());
-	cam.SetRestrictBottom(-curEnv.MaxY());
+	auto cam = std::make_shared<Camera>(10, ratio);
+	cam->Teather(player.get());
+	
+	vector<std::shared_ptr<Object>> masterList;
+	masterList.push_back(cam);
+	masterList.push_back(player);
+	
+	curEnv.Read(masterList, player, 0, cam);
 
 	//for(int i=0;i<2000;++i)
 	//{
@@ -211,10 +209,6 @@ int main(int argc, char** argv)
 	//	masterList.push_back(newBullet);
 	//}
 
-	//std::shared_ptr<Object> bullet = std::make_shared<Bullet>(glm::vec3(-6, -4, 0), glm::vec3(0.5, 0, 0), "..\\resources\\Bullet.dds", player.get());
-
-	masterList.push_back(player);
-	
 	double lastTime = glfwGetTime(), framerateStartTime = lastTime;
 
 	int frameCount = 0;
@@ -333,9 +327,6 @@ int main(int argc, char** argv)
 			_save = false;
 		}
 
-		cam.Update(timeSinceLastFrame, masterList);
-
-		cam.Draw();
 		foreach(masterList, std::bind(&Object::Draw, std::placeholders::_1));
 
 		if(!player->IsAlive())

@@ -22,10 +22,11 @@ void Environment::Edit()
 	//_objList.push_back(std::make_shared<Object>());
 	//_enemyList.push_back(std::make_pair(Object::EnemyType::Generic, Object::Core()));
 	//_upgradeList.push_back(std::make_pair(Upgrade::Type::WALL_JUMP, Object::Core()));
+	//_spawnPointList.push_back(glm::vec3(0, 5, 0));
 	WriteInit("ENV0", errorMsg);
 }
 
-void Environment::Read(std::vector<std::shared_ptr<Object>>& objList, std::shared_ptr<Player> player)
+void Environment::Read(std::vector<std::shared_ptr<Object>>& objList, std::shared_ptr<Player> player, const uint32_t& entranceId, std::shared_ptr<Camera> cam)
 {
 	foreach(_objList, [&objList](const Object::Core& objCore)
 	{
@@ -42,6 +43,12 @@ void Environment::Read(std::vector<std::shared_ptr<Object>>& objList, std::share
 		if(!player->HasUpgrade(upgradeDesc.first))
 			objList.push_back(std::make_shared<Upgrade>(upgradeDesc.first, upgradeDesc.second));
 	});
+
+	player->Pos(_spawnPointList[entranceId]);
+	cam->SetRestrictLeft(-_maxX);
+	cam->SetRestrictRight(_maxX);
+	cam->SetRestrictTop(_maxY);
+	cam->SetRestrictBottom(-_maxY);
 }
 
 float Environment::MaxX() const
@@ -64,6 +71,7 @@ bool Environment::HandleDataRead(const std::string& fileCode, std::ifstream& fin
 	rv &= Extract(fin, _objList);
 	rv &= Extract(fin, _enemyList);
 	rv &= Extract(fin, _upgradeList);
+	rv &= Extract(fin, _spawnPointList);
 
 	if(!rv)
 	{
@@ -83,6 +91,7 @@ bool Environment::HandleDataWrite(const std::string& fileCode, std::ofstream& fo
 	rv &= Insert(fout, _objList);
 	rv &= Insert(fout, _enemyList);
 	rv &= Insert(fout, _upgradeList);
+	rv &= Insert(fout, _spawnPointList);
 
 	if(!rv)
 	{
