@@ -19,6 +19,9 @@ public:
 	void Activate();
 	void Deactivate();
 
+	float GetUniform(const std::string& varName);
+	void SetUniform(const std::string& varName, const float& varVal);
+
 	std::shared_ptr<ResourceHolder> ActivateScoped();
 
 private:

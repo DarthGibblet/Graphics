@@ -1,4 +1,5 @@
 #include "Environment.h"
+#include "Constants.h"
 
 #include <boost/assign/list_of.hpp>
 
@@ -7,8 +8,8 @@
 using std::cout;
 using std::endl;
 
-Environment::Environment(const std::string& filePath) : DataFile(filePath, boost::assign::list_of("ENV0")),
-	_exData(0)
+Environment::Environment(const std::string& name) : DataFile(std::string(RESOURCE_DIR_PATH) + "environments\\" + name + ".env", boost::assign::list_of("ENV0")),
+	_name(name), _exData(0)
 {
 	boost::format errorMsg;
 	if(!ReadInit(errorMsg))
@@ -18,12 +19,19 @@ Environment::Environment(const std::string& filePath) : DataFile(filePath, boost
 void Environment::Edit()
 {
 	boost::format errorMsg;
-	ReadInit(errorMsg);
-	//_objList.push_back(std::make_shared<Object>());
-	//_enemyList.push_back(std::make_pair(Object::EnemyType::Generic, Object::Core()));
-	//_upgradeList.push_back(std::make_pair(Upgrade::Type::WALL_JUMP, Object::Core()));
-	//_spawnPointList.push_back(glm::vec3(0, 5, 0));
-	WriteInit("ENV0", errorMsg);
+	if(!ReadInit(errorMsg))
+	{
+		cout <<errorMsg <<endl;
+	}
+	else
+	{
+		//_objList.push_back(std::make_shared<Object>());
+		//_enemyList.push_back(std::make_pair(Object::EnemyType::Generic, Object::Core()));
+		//_upgradeList.push_back(std::make_pair(Upgrade::Type::WALL_JUMP, Object::Core()));
+		//_spawnPointList.push_back(glm::vec3(0, 5, 0));
+		//_exitList.push_back(Object::Core());
+		WriteInit("ENV0", errorMsg);
+	}
 }
 
 void Environment::Read(std::vector<std::shared_ptr<Object>>& objList, std::shared_ptr<Player> player, const uint32_t& entranceId, std::shared_ptr<Camera> cam)
@@ -44,11 +52,24 @@ void Environment::Read(std::vector<std::shared_ptr<Object>>& objList, std::share
 			objList.push_back(std::make_shared<Upgrade>(upgradeDesc.first, upgradeDesc.second));
 	});
 
-	player->Pos(_spawnPointList[entranceId]);
+	foreach(_exitList, [&objList](const Object::Core& exitDesc)
+	{
+		objList.push_back(std::make_shared<Object>(exitDesc));
+	});
+
+	if(_entryList.size() > entranceId)
+		player->Pos(_entryList[entranceId]);
+	else
+		std::cout <<"Error loading environment file. Unable to find entrance with ID " <<entranceId <<std::endl;
 	cam->SetRestrictLeft(-_maxX);
 	cam->SetRestrictRight(_maxX);
 	cam->SetRestrictTop(_maxY);
 	cam->SetRestrictBottom(-_maxY);
+}
+
+std::string Environment::Name() const
+{
+	return _name;
 }
 
 float Environment::MaxX() const
@@ -71,7 +92,8 @@ bool Environment::HandleDataRead(const std::string& fileCode, std::ifstream& fin
 	rv &= Extract(fin, _objList);
 	rv &= Extract(fin, _enemyList);
 	rv &= Extract(fin, _upgradeList);
-	rv &= Extract(fin, _spawnPointList);
+	rv &= Extract(fin, _entryList);
+	rv &= Extract(fin, _exitList);
 
 	if(!rv)
 	{
@@ -91,7 +113,8 @@ bool Environment::HandleDataWrite(const std::string& fileCode, std::ofstream& fo
 	rv &= Insert(fout, _objList);
 	rv &= Insert(fout, _enemyList);
 	rv &= Insert(fout, _upgradeList);
-	rv &= Insert(fout, _spawnPointList);
+	rv &= Insert(fout, _entryList);
+	rv &= Insert(fout, _exitList);
 
 	if(!rv)
 	{

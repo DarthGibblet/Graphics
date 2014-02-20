@@ -177,10 +177,12 @@ int main(int argc, char** argv)
 	glEnable(GL_STENCIL_TEST);
 
 	SaveFile save("..\\saves\\autosave.dat");
-	unsigned int upgradeMask = 0;
-	save.Read(upgradeMask);
+	uint32_t upgradeMask = 0;
+	std::string envName;
+	uint32_t envEntranceId = 0;
+	save.Read(upgradeMask, envName, envEntranceId);
 
-	Environment curEnv("..\\resources\\environments\\start.env");
+	Environment curEnv(envName);
 	curEnv.Edit();
 
 	auto player = std::make_shared<Player>(upgradeMask);
@@ -195,7 +197,7 @@ int main(int argc, char** argv)
 	masterList.push_back(cam);
 	masterList.push_back(player);
 	
-	curEnv.Read(masterList, player, 0, cam);
+	curEnv.Read(masterList, player, envEntranceId, cam);
 
 	//for(int i=0;i<2000;++i)
 	//{
@@ -319,7 +321,7 @@ int main(int argc, char** argv)
 		}
 		if(_save)
 		{
-			bool saveRes = save.Write(player->GetUpgradeMask());
+			bool saveRes = save.Write(player->GetUpgradeMask(), curEnv.Name(), 0);
 			if(saveRes)
 				cout <<"Progress saved to file" <<endl;
 			else

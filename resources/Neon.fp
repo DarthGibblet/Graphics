@@ -1,5 +1,6 @@
 //Taken from http://myheroics.wordpress.com/2008/09/04/glsl-bloom-shader/
 uniform sampler2D bgl_RenderedTexture;
+uniform float runningTime;
 
 void main()
 {
@@ -21,17 +22,17 @@ void main()
    
    if (texture2D(bgl_RenderedTexture, texcoord).r < 0.3)
    {
-      gl_FragColor = sum*sum*0.012 + texture2D(bgl_RenderedTexture, texcoord);
+      gl_FragColor = sum*sum*0.006*(sin(runningTime)+1) + texture2D(bgl_RenderedTexture, texcoord);
    }
    else
    {
       if (texture2D(bgl_RenderedTexture, texcoord).r < 0.5)
       {
-         gl_FragColor = sum*sum*0.009 + texture2D(bgl_RenderedTexture, texcoord);
+         gl_FragColor = sum*sum*0.0045*(sin(runningTime)+1) + texture2D(bgl_RenderedTexture, texcoord);
       }
       else
       {
-         gl_FragColor = sum*sum*0.0075 + texture2D(bgl_RenderedTexture, texcoord);
+         gl_FragColor = sum*sum*0.00375*(sin(runningTime)+1) + texture2D(bgl_RenderedTexture, texcoord);
       }
    }
 }

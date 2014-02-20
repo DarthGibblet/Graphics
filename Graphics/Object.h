@@ -16,7 +16,7 @@ class Object
 public:
 	struct Type
 	{
-		enum E { Generic, Block, Player, Enemy, Bullet, Upgrade, Camera, END };
+		enum E { Generic, Block, Player, Enemy, Bullet, Upgrade, Camera, Exit, END };
 	};
 
 	struct EnemyType

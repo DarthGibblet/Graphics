@@ -114,6 +114,10 @@ void Player::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std
 		_standingClearanceZone->Reset();
 	}
 
+	float curGlowVal = _shader->GetUniform("runningTime");
+	curGlowVal += static_cast<float>(secondsSinceLastUpdate);
+	_shader->SetUniform("runningTime", curGlowVal);
+
 	Entity::Update(secondsSinceLastUpdate, objList);
 }
 
@@ -144,6 +148,9 @@ void Player::HandleCollision(Object* other)
 		break;
 	case Object::Type::Upgrade:
 		_upgradeMask |= reinterpret_cast<Upgrade*>(other)->Power();
+		break;
+	case Object::Type::Exit:
+		std::cout <<"Colliding with exit" <<std::endl;
 		break;
 	}
 }

@@ -95,6 +95,20 @@ void Shader::Deactivate()
 	glUseProgram(0);
 }
 
+float Shader::GetUniform(const std::string& varName)
+{
+	GLint varLocation = glGetUniformLocation(_shaderId, varName.c_str());
+	float rv;
+	glGetUniformfv(_shaderId, varLocation, &rv);
+	return rv;
+}
+
+void Shader::SetUniform(const std::string& varName, const float& varVal)
+{
+	GLint varLocation = glGetUniformLocation(_shaderId, varName.c_str());
+	glProgramUniform1f(_shaderId, varLocation, varVal);
+}
+
 std::shared_ptr<ResourceHolder> Shader::ActivateScoped()
 {
 	Activate();
