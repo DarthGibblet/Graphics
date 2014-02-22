@@ -50,7 +50,7 @@ public:
 	void HandleCollision(std::shared_ptr<Object> other);
 	virtual void HandleCollision(Object* other);
 	bool IsContainedByBox(const glm::vec3& boxCenter, const double& boxWidth, const double& boxHeight);
-	bool UsePreciseCollisions();
+	virtual bool UsePreciseCollisions();
 
 	Object::Type::E Type() const;
 	virtual Object::Type::E OwnerType() const;

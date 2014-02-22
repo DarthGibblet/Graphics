@@ -178,11 +178,12 @@ int main(int argc, char** argv)
 
 	SaveFile save("..\\saves\\autosave.dat");
 	uint32_t upgradeMask = 0;
-	std::string envName;
+	std::string envName = "start";
 	uint32_t envEntranceId = 0;
 	save.Read(upgradeMask, envName, envEntranceId);
+	//envName = "one_zero";
 
-	Environment curEnv(envName);
+	Environment curEnv(envName, envEntranceId);
 	curEnv.Edit();
 
 	auto player = std::make_shared<Player>(upgradeMask);
@@ -193,11 +194,15 @@ int main(int argc, char** argv)
 	auto cam = std::make_shared<Camera>(10, ratio);
 	cam->Teather(player.get());
 	
+	std::string newEnvName;
+	uint32_t newEnvEntrance = 0;
+	auto prepEnvChange = [&newEnvName, &newEnvEntrance](const std::string& name, const uint32_t& entranceId)
+	{
+		newEnvName = name;
+		newEnvEntrance = entranceId;
+	};
 	vector<std::shared_ptr<Object>> masterList;
-	masterList.push_back(cam);
-	masterList.push_back(player);
-	
-	curEnv.Read(masterList, player, envEntranceId, cam);
+	curEnv.Read(masterList, player, cam, prepEnvChange);
 
 	//for(int i=0;i<2000;++i)
 	//{
@@ -246,8 +251,8 @@ int main(int argc, char** argv)
 		//Frame action order:
 		//  1.) Remove dead objects
 		//  2.) Perform collision detection and response
-		//  3.) Respond to user input
-		//  4.) Perform "Update" function
+		//  3.) Perform "Update" function
+		//  4.) Respond to user input
 		//  5.) Draw
 
 		masterList = std::vector<std::shared_ptr<Object>>(std::begin(masterList), std::remove_if(std::begin(masterList), std::end(masterList), [](std::shared_ptr<Object> obj) -> bool
@@ -321,7 +326,7 @@ int main(int argc, char** argv)
 		}
 		if(_save)
 		{
-			bool saveRes = save.Write(player->GetUpgradeMask(), curEnv.Name(), 0);
+			bool saveRes = save.Write(player->GetUpgradeMask(), curEnv.Name(), curEnv.EntranceId());
 			if(saveRes)
 				cout <<"Progress saved to file" <<endl;
 			else
@@ -330,6 +335,14 @@ int main(int argc, char** argv)
 		}
 
 		foreach(masterList, std::bind(&Object::Draw, std::placeholders::_1));
+
+		//If there was an environment change, read the new environment file
+		if(!newEnvName.empty())
+		{
+			curEnv = Environment(newEnvName, newEnvEntrance);
+			curEnv.Read(masterList, player, cam, prepEnvChange);
+			newEnvName.clear();
+		}
 
 		if(!player->IsAlive())
 			_shouldClose = true;

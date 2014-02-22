@@ -149,9 +149,6 @@ void Player::HandleCollision(Object* other)
 	case Object::Type::Upgrade:
 		_upgradeMask |= reinterpret_cast<Upgrade*>(other)->Power();
 		break;
-	case Object::Type::Exit:
-		std::cout <<"Colliding with exit" <<std::endl;
-		break;
 	}
 }
 
