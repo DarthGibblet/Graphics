@@ -17,24 +17,6 @@ Environment::Environment(const std::string& name, const unsigned int& entranceId
 		cout <<errorMsg <<endl;
 }
 
-void Environment::Edit()
-{
-	boost::format errorMsg;
-	if(!ReadInit(errorMsg))
-	{
-		cout <<errorMsg <<endl;
-	}
-	else
-	{
-		//_objList.push_back(Object::Core());
-		//_enemyList.push_back(std::make_pair(Object::EnemyType::Generic, Object::Core()));
-		//_upgradeList.push_back(std::make_pair(Upgrade::Type::WALL_JUMP, Object::Core()));
-		//_entryList.push_back(glm::vec3(26.5, -4.5, 0));
-		//_exitList.push_back(ExitDesc());
-		WriteInit("ENV0", errorMsg);
-	}
-}
-
 void Environment::Read(std::vector<std::shared_ptr<Object>>& objList, std::shared_ptr<Player> player, std::shared_ptr<Camera> cam,
 	const Exit::env_change_func_t& envChange)
 {
@@ -73,6 +55,30 @@ void Environment::Read(std::vector<std::shared_ptr<Object>>& objList, std::share
 	cam->SetRestrictBottom(-_maxY);
 }
 
+void Environment::Write()
+{
+	boost::format errorMsg;
+	WriteInit("ENV0", errorMsg);
+}
+
+void Environment::Edit()
+{
+	boost::format errorMsg;
+	if(!ReadInit(errorMsg))
+	{
+		cout <<errorMsg <<endl;
+	}
+	else
+	{
+		//_objList.push_back(Object::Core());
+		//_enemyList.push_back(std::make_pair(Object::EnemyType::Generic, Object::Core()));
+		//_upgradeList.push_back(std::make_pair(Upgrade::Type::WALL_JUMP, Object::Core()));
+		//_entryList.push_back(glm::vec3(26.5, -4.5, 0));
+		//_exitList.push_back(ExitDesc());
+		WriteInit("ENV0", errorMsg);
+	}
+}
+
 std::string Environment::Name() const
 {
 	return _name;
@@ -88,9 +94,39 @@ float Environment::MaxX() const
 	return _maxX;
 }
 
+void Environment::MaxX(const float& maxX)
+{
+	_maxX = maxX;
+}
+
 float Environment::MaxY() const
 {
 	return _maxY;
+}
+
+void Environment::MaxY(const float& maxY)
+{
+	_maxY = maxY;
+}
+
+std::vector<Object::Core> Environment::ObjList()
+{
+	return _objList;
+}
+
+void Environment::AddObj()
+{
+	_objList.push_back(Object::Core());
+}
+
+void Environment::RemoveObj(const unsigned int& idx)
+{
+	_objList.erase(_objList.begin() + idx);
+}
+
+void Environment::UpdateObj(const Object::Core& core, const unsigned int& idx)
+{
+	_objList[idx] = core;
 }
 
 bool Environment::HandleDataRead(const std::string& fileCode, std::ifstream& fin, boost::format& errorMsg)
