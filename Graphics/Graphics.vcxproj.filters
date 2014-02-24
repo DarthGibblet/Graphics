@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\MeshTypes">
-      <UniqueIdentifier>{84f60edd-62c3-4d09-85d3-cbf681d437b6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\MeshTypes">
-      <UniqueIdentifier>{f1b55cd4-ce99-4f2b-8d63-a9bdd82c04c4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\Environments">
       <UniqueIdentifier>{a3ac1c71-d872-4154-ab14-b863d75f2d17}</UniqueIdentifier>
     </Filter>
@@ -27,58 +21,10 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Box.cpp">
-      <Filter>Source Files\MeshTypes</Filter>
-    </ClCompile>
     <ClCompile Include="Quadtree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Bullet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Upgrade.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SaveFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Entity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Shield.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Zone.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Environment.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DataFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Constants.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Exit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -103,58 +49,10 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Box.h">
-      <Filter>Header Files\MeshTypes</Filter>
-    </ClInclude>
     <ClInclude Include="Quadtree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Bullet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Upgrade.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Constants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SaveFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shield.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Zone.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Environment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DataFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Exit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

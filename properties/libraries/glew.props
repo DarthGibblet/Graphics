@@ -8,10 +8,12 @@
   <ItemDefinitionGroup>
     <Link>
       <AdditionalLibraryDirectories>$(DEV_HOME)\libraries\glew\$(GLEW_VERSION)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glewdll_x64.lib;Opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew_x64.lib;Opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>$(DEV_HOME)\libraries\glew\$(GLEW_VERSION)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

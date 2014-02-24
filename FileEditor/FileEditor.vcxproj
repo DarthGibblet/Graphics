@@ -11,23 +11,25 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{42524A8F-6DFF-45C6-BAA2-95D9CF96B8D1}</ProjectGuid>
-    <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Graphics</RootNamespace>
+    <ProjectGuid>{9B2A4632-EFA6-4DE1-99F5-6F586B808F60}</ProjectGuid>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <Keyword>ManagedCProj</Keyword>
+    <RootNamespace>FileEditor</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>true</CLRSupport>
     <PlatformToolset>v110</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>true</CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -36,19 +38,13 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\properties\common.props" />
     <Import Project="..\properties\debug.props" />
-    <Import Project="..\properties\libraries\boost.props" />
-    <Import Project="..\properties\libraries\glew.props" />
-    <Import Project="..\properties\libraries\glfw.props" />
-    <Import Project="..\properties\libraries\glm.props" />
+    <Import Project="..\properties\ProjectSpecific\FileEditor.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\properties\common.props" />
     <Import Project="..\properties\release.props" />
-    <Import Project="..\properties\libraries\boost.props" />
-    <Import Project="..\properties\libraries\glew.props" />
-    <Import Project="..\properties\libraries\glfw.props" />
-    <Import Project="..\properties\libraries\glm.props" />
+    <Import Project="..\properties\ProjectSpecific\FileEditor.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
@@ -58,32 +54,33 @@
     <Link />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile />
-    <Link />
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Quadtree.cpp" />
-    <ClCompile Include="SaveFile.cpp" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\resources\Bar.dds" />
-    <Image Include="..\resources\Bullet.dds" />
-    <Image Include="..\resources\DoubleJump.dds" />
-    <Image Include="..\resources\Gust.dds" />
-    <Image Include="..\resources\Shield.dds" />
-    <Image Include="..\resources\WallJump.dds" />
+    <ClCompile Include="SaveFileEdit.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Quadtree.h" />
-    <ClInclude Include="SaveFile.h" />
+    <ClInclude Include="SaveFileEdit.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resources\DemoShader.fp" />
-    <None Include="..\resources\DemoShader.vp" />
-    <None Include="..\resources\environments\start.env" />
-    <None Include="..\resources\Neon.fp" />
-    <None Include="..\resources\Neon.vp" />
+    <EmbeddedResource Include="SaveFileEdit.resx">
+      <DependentUpon>SaveFileEdit.h</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GraphicsCommon\GraphicsCommon.vcxproj">

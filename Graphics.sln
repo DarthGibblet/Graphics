@@ -2,6 +2,13 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Windows Desktop
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Graphics\Graphics.vcxproj", "{42524A8F-6DFF-45C6-BAA2-95D9CF96B8D1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{34CBB0DC-1CD3-4B9C-A254-4347BCB16B2B} = {34CBB0DC-1CD3-4B9C-A254-4347BCB16B2B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileEditor", "FileEditor\FileEditor.vcxproj", "{9B2A4632-EFA6-4DE1-99F5-6F586B808F60}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GraphicsCommon", "GraphicsCommon\GraphicsCommon.vcxproj", "{34CBB0DC-1CD3-4B9C-A254-4347BCB16B2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +20,14 @@ Global
 		{42524A8F-6DFF-45C6-BAA2-95D9CF96B8D1}.Debug|x64.Build.0 = Debug|x64
 		{42524A8F-6DFF-45C6-BAA2-95D9CF96B8D1}.Release|x64.ActiveCfg = Release|x64
 		{42524A8F-6DFF-45C6-BAA2-95D9CF96B8D1}.Release|x64.Build.0 = Release|x64
+		{9B2A4632-EFA6-4DE1-99F5-6F586B808F60}.Debug|x64.ActiveCfg = Debug|x64
+		{9B2A4632-EFA6-4DE1-99F5-6F586B808F60}.Debug|x64.Build.0 = Debug|x64
+		{9B2A4632-EFA6-4DE1-99F5-6F586B808F60}.Release|x64.ActiveCfg = Release|x64
+		{9B2A4632-EFA6-4DE1-99F5-6F586B808F60}.Release|x64.Build.0 = Release|x64
+		{34CBB0DC-1CD3-4B9C-A254-4347BCB16B2B}.Debug|x64.ActiveCfg = Debug|x64
+		{34CBB0DC-1CD3-4B9C-A254-4347BCB16B2B}.Debug|x64.Build.0 = Debug|x64
+		{34CBB0DC-1CD3-4B9C-A254-4347BCB16B2B}.Release|x64.ActiveCfg = Release|x64
+		{34CBB0DC-1CD3-4B9C-A254-4347BCB16B2B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

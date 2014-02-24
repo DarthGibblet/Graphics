@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets">
+    <Import Project="..\libraries\boost.props" />
+    <Import Project="..\libraries\glfw.props" />
+    <Import Project="..\libraries\glm.props" />
+    <Import Project="..\libraries\glew.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <Link>
+      <EntryPointSymbol>Main</EntryPointSymbol>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>GLEW_STATIC;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\FileEditor\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
