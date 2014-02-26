@@ -9,6 +9,7 @@ Entity::Entity(const Object::EnemyType::E& type, const Object::Core& core) :
 		_falls = true;
 		Text("..\\resources\\Gust.dds");
 		Vel(glm::vec3(0.25, 0, 0));
+		Size(glm::vec3(0.8, 1, 1));
 		break;
 	}
 }
