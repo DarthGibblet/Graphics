@@ -16,6 +16,7 @@ class Environment : DataFile
 {
 public:
 
+	typedef Object::Core arch_desc_t;
 	typedef std::pair<Object::EnemyType::E, Object::Core> enemy_desc_t;
 	typedef std::pair<Upgrade::Type::E, Object::Core> upgrade_desc_t;
 	typedef glm::vec3 entrance_desc_t;
@@ -30,7 +31,25 @@ public:
 		bool StreamExtract(std::ifstream& fin);
 	} exit_desc_t;
 
-	Environment(const std::string& name, const unsigned int& entranceId);
+	template<typename T>
+	struct Collection
+	{
+		friend Environment;
+
+		size_t Size() const { return _list.size(); }
+		T Get(const unsigned int& idx) const { return _list[idx]; }
+		T Get(size_t& idx) const { return Get(static_cast<unsigned int>(idx)); }
+		void Add() { _list.push_back(T()); }
+		void Remove(const unsigned int& idx) { _list.erase(_list.begin() + idx); }
+		void Update(const T& item, const unsigned int& idx) { _list[idx] = item; }
+		bool StreamInsert(std::ofstream& stream) const { return DataFile::Insert(stream, _list); }
+		bool StreamExtract(std::ifstream& stream) { return DataFile::Extract(stream, _list); }
+
+	private:
+		std::vector<T> _list;
+	};
+
+	Environment(const std::string& name, const unsigned int& entranceId, const bool fullPath = false);
 
 	void Read(std::vector<std::shared_ptr<Object>>& objList, std::shared_ptr<Player> player, std::shared_ptr<Camera> cam,
 		const Exit::env_change_func_t& envChange);
@@ -44,36 +63,11 @@ public:
 	float MaxY() const;
 	void MaxY(const float& maxY);
 
-	size_t ObjListSize() const;
-	Object::Core GetObj(const unsigned int& idx) const;
-	void AddObj();
-	void RemoveObj(const unsigned int& idx);
-	void UpdateObj(const Object::Core& core, const unsigned int& idx);
-
-	size_t EnemyListSize() const;
-	enemy_desc_t GetEnemy(const unsigned int& idx) const;
-	void AddEnemy();
-	void RemoveEnemy(const unsigned int& idx);
-	void UpdateEnemy(const enemy_desc_t& desc, const unsigned int& idx);
-
-	size_t UpgradeListSize() const;
-	upgrade_desc_t GetUpgrade(const unsigned int& idx) const;
-	void AddUpgrade();
-	void RemoveUpgrade(const unsigned int& idx);
-	void UpdateUpgrade(const upgrade_desc_t& desc, const unsigned int& idx);
-
-	size_t EntranceListSize() const;
-	entrance_desc_t GetEntrance(const unsigned int& idx) const;
-	void AddEntrance();
-	void RemoveEntrance(const unsigned int& idx);
-	void UpdateEntrance(const entrance_desc_t& desc, const unsigned int& idx);
-
-	size_t ExitListSize() const;
-	exit_desc_t GetExit(const unsigned int& idx) const;
-	void AddExit();
-	void RemoveExit(const unsigned int& idx);
-	void UpdateExit(const exit_desc_t& desc, const unsigned int& idx);
-
+	Collection<arch_desc_t> _architecture;
+	Collection<enemy_desc_t> _enemies;
+	Collection<upgrade_desc_t> _upgrades;
+	Collection<entrance_desc_t> _entrances;
+	Collection<exit_desc_t> _exits;
 protected:
 	bool HandleDataRead(const std::string& fileCode, std::ifstream& fin, boost::format& errorMsg) override;
 	bool HandleDataWrite(const std::string& fileCode, std::ofstream& fout, boost::format& errorMsg) override;
@@ -82,9 +76,4 @@ protected:
 	unsigned int _entranceId;
 	uint64_t _exData;
 	float _maxX, _maxY;
-	std::vector<Object::Core> _objList;
-	std::vector<enemy_desc_t> _enemyList;
-	std::vector<upgrade_desc_t> _upgradeList;
-	std::vector<entrance_desc_t> _entryList;
-	std::vector<exit_desc_t> _exitList;
 };

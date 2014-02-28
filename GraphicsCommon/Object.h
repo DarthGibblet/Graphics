@@ -6,6 +6,8 @@
 
 #include <glm/glm.hpp>
 
+#include <boost/static_assert.hpp>
+
 #include <string>
 #include <map>
 #include <vector>
@@ -17,11 +19,58 @@ public:
 	struct Type
 	{
 		enum E { Generic, Block, Player, Enemy, Bullet, Upgrade, Camera, Exit, END };
+
+		static std::string ToString(const unsigned int& val)
+		{
+			if(val < Type::END)
+				return ToString(static_cast<Type::E>(val));
+			return "";
+		}
+
+		static std::string ToString(const E& val)
+		{
+			BOOST_STATIC_ASSERT(Type::END == 8);
+			static std::string convMap[Type::END];
+			static bool initialized = false;
+			if(!initialized)
+			{
+				convMap[Generic] = "Generic";
+				convMap[Block] = "Block";
+				convMap[Player] = "Player";
+				convMap[Enemy] = "Enemy";
+				convMap[Bullet] = "Bullet";
+				convMap[Upgrade] = "Upgrade";
+				convMap[Camera] = "Camera";
+				convMap[Exit] = "Exit";
+				initialized = true;
+			}
+			return convMap[val];
+		}
 	};
 
 	struct EnemyType
 	{
 		enum E { Generic, Tornado, END };
+
+		static std::string ToString(const unsigned int& val)
+		{
+			if(val < EnemyType::END)
+				return ToString(static_cast<EnemyType::E>(val));
+			return "";
+		}
+		static std::string ToString(const E& val)
+		{
+			BOOST_STATIC_ASSERT(EnemyType::END == 2);
+			static std::string convMap[EnemyType::END];
+			static bool initialized = false;
+			if(!initialized)
+			{
+				convMap[Generic] = "Generic";
+				convMap[Tornado] = "Tornado";
+				initialized = true;
+			}
+			return convMap[val];
+		}
 	};
 
 	struct Core
