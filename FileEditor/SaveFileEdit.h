@@ -756,6 +756,7 @@ private: System::Windows::Forms::Label^  ExitGroupLabel;
 			// 
 			// SaveFileEdit
 			// 
+			this->AllowDrop = true;
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(307, 776);
@@ -819,23 +820,16 @@ private: System::Windows::Forms::Label^  ExitGroupLabel;
 			this->Controls->Add(this->OpenButton);
 			this->Name = L"SaveFileEdit";
 			this->Text = L"File Editor";
+			this->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &SaveFileEdit::DropFileFunc);
+			this->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &SaveFileEdit::DragEnterFunc);
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
-	private: System::Void LoadFile(System::Object^  sender, System::EventArgs^  e) {
-				 OpenFileDialog^ openFileDB = gcnew OpenFileDialog;
-
-				 openFileDB->InitialDirectory = "C:\\Users\\rick\\Documents\\Development\\Graphics\\resources\\environments";
-				 openFileDB->Filter = "Environment files|*.env|Save files|*.dat|All files|*.*";
-				 openFileDB->FilterIndex = 0;
-				 openFileDB->RestoreDirectory = true;
-
-				 if(openFileDB->ShowDialog() == System::Windows::Forms::DialogResult::OK)
-				 {
-					 msclr::interop::marshal_context context;
-					 _envData = new ::Environment(msclr::interop::marshal_as<std::string>(openFileDB->FileName), 0, true);
+	private: System::Void LoadFile(System::String^ filePath)
+			 {
+					 _envData = new ::Environment(msclr::interop::marshal_as<std::string>(filePath), 0, true);
 					 MaxXField->Text = _envData->MaxX().ToString();
 					 MaxYField->Text = _envData->MaxY().ToString();
 
@@ -872,7 +866,18 @@ private: System::Windows::Forms::Label^  ExitGroupLabel;
 					 ExitSelectField->Items->Clear();
 					 for(size_t i=0; i<_envData->_exits.Size(); ++i)
 						 ExitSelectField->Items->Add("Exit " + i.ToString());
-				 }
+			 }
+
+	private: System::Void LoadFile(System::Object^  sender, System::EventArgs^  e) {
+				 OpenFileDialog^ openFileDB = gcnew OpenFileDialog;
+
+				 openFileDB->InitialDirectory = "C:\\Users\\rick\\Documents\\Development\\Graphics\\resources\\environments";
+				 openFileDB->Filter = "Environment files|*.env|Save files|*.dat|All files|*.*";
+				 openFileDB->FilterIndex = 0;
+				 openFileDB->RestoreDirectory = true;
+
+				 if(openFileDB->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+					 LoadFile(openFileDB->FileName);
 			 }
 	private: System::Void SaveFile(System::Object^  sender, System::EventArgs^  e) {
 				 if(_envData)
@@ -1113,5 +1118,16 @@ private: System::Windows::Forms::Label^  ExitGroupLabel;
 					 ExitSizeYField->Text = "";
 				 }
 			 }
+private: System::Void DropFileFunc(System::Object^  sender, System::Windows::Forms::DragEventArgs^  e) {
+			 if(e->Data->GetDataPresent(DataFormats::FileDrop))
+			 {
+				 array<String^>^ fileList = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);
+				 LoadFile(fileList[0]);
+			 }
+		 }
+private: System::Void DragEnterFunc(System::Object^  sender, System::Windows::Forms::DragEventArgs^  e) {
+			 if(e->Data->GetDataPresent(DataFormats::FileDrop))
+				 e->Effect = DragDropEffects::Copy;
+		 }
 };
 }

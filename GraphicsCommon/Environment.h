@@ -51,10 +51,11 @@ public:
 
 	Environment(const std::string& name, const unsigned int& entranceId, const bool fullPath = false);
 
+	//Configures the parameters to match the currently-loaded information
 	void Read(std::vector<std::shared_ptr<Object>>& objList, std::shared_ptr<Player> player, std::shared_ptr<Camera> cam,
 		const Exit::env_change_func_t& envChange);
+	//Writes the currently-loaded information to disc
 	void Write();
-	void Edit();
 
 	std::string Name() const;
 	unsigned int EntranceId() const;
