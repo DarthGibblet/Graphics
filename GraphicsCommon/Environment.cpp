@@ -66,24 +66,6 @@ void Environment::Write()
 	WriteInit("ENV0", errorMsg);
 }
 
-void Environment::Edit()
-{
-	boost::format errorMsg;
-	if(!ReadInit(errorMsg))
-	{
-		cout <<errorMsg <<endl;
-	}
-	else
-	{
-		//_objList.push_back(Object::Core());
-		//_enemyList.push_back(std::make_pair(Object::EnemyType::Generic, Object::Core()));
-		//_upgradeList.push_back(std::make_pair(Upgrade::Type::WALL_JUMP, Object::Core()));
-		//_entryList.push_back(glm::vec3(26.5, -4.5, 0));
-		//_exitList.push_back(ExitDesc());
-		WriteInit("ENV0", errorMsg);
-	}
-}
-
 std::string Environment::Name() const
 {
 	return _name;

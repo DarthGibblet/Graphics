@@ -184,7 +184,6 @@ int main(int argc, char** argv)
 	//envName = "one_zero";
 
 	Environment curEnv(envName, envEntranceId);
-	curEnv.Edit();
 
 	auto player = std::make_shared<Player>(upgradeMask);
 
