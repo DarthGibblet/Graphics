@@ -4,6 +4,7 @@
 #include "Bullet.h"
 #include "Upgrade.h"
 #include "Shield.h"
+#include "Slash.h"
 #include "Zone.h"
 
 #include <glm/glm.hpp>
@@ -36,6 +37,8 @@ protected:
 	bool _isJumping, _wallJumpable, _wallJumpLeft;
 	double _dashTimer;
 	bool _crouching, _dashReady, _dashing, _pendingCrouchRelease;
+	bool _slashing;
+	double _slashTimer;
 	glm::vec3 _curJumpVel;
 	double _wallJumpableCountdown;
 	bool _movingLeft, _movingRight;
@@ -44,6 +47,7 @@ protected:
 	unsigned int _upgradeMask;
 
 	std::shared_ptr<Shield> _shield;
+	std::shared_ptr<Slash> _activeSlash;
 	std::shared_ptr<Zone> _standingClearanceZone;
 
 };

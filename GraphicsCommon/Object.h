@@ -50,7 +50,7 @@ public:
 
 	struct EnemyType
 	{
-		enum E { Generic, Tornado, END };
+		enum E { Generic, Tornado, Boss, END };
 
 		static std::string ToString(const unsigned int& val)
 		{
@@ -60,13 +60,14 @@ public:
 		}
 		static std::string ToString(const E& val)
 		{
-			BOOST_STATIC_ASSERT(EnemyType::END == 2);
+			BOOST_STATIC_ASSERT(EnemyType::END == 3);
 			static std::string convMap[EnemyType::END];
 			static bool initialized = false;
 			if(!initialized)
 			{
 				convMap[Generic] = "Generic";
 				convMap[Tornado] = "Tornado";
+				convMap[Boss] = "Boss";
 				initialized = true;
 			}
 			return convMap[val];
@@ -110,9 +111,13 @@ public:
 	const glm::vec3& PrevPos() const;
 	const glm::vec3& Size() const;
 	void Size(const glm::vec3& size);
-	void IsAlive(const bool isAlive);
-	bool IsAlive();
+	virtual void IsAlive(const bool isAlive);
+	virtual bool IsAlive() const;
+	void FacingBackwards(const bool facingBackwards);
+	bool FacingBackwards();
 	void Text(const std::string& textPath);
+
+	void SetDeathTimer(const double& secondsUtilDeath);
 
 	bool StreamInsert(std::ofstream& stream) const;
 	bool StreamExtract(std::ifstream& stream);
@@ -124,6 +129,7 @@ protected:
 	glm::vec3 _prevPos;
 
 	bool _isAlive, _facingBackwards;
+	double _deathTimer; //The number of seconds until this object dies. -1 indicates it is not set
 	
 	static std::map<std::string, std::shared_ptr<Texture>> _textureCache;
 	std::shared_ptr<Texture> _text;

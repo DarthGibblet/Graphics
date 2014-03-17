@@ -36,7 +36,7 @@ void Environment::Read(std::vector<std::shared_ptr<Object>>& objList, std::share
 
 	foreach(_enemies._list, [&objList](const enemy_desc_t& enemyDesc)
 	{
-		objList.push_back(std::make_shared<Entity>(enemyDesc.first, enemyDesc.second));
+		objList.push_back(std::make_shared<Entity>(enemyDesc.first, enemyDesc.second, objList));
 	});
 
 	foreach(_upgrades._list, [&objList, &player](const upgrade_desc_t& upgradeDesc)

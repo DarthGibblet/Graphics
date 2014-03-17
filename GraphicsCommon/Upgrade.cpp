@@ -22,7 +22,7 @@ Upgrade::Upgrade(const glm::vec3& pos, const glm::vec3& size, const std::string&
 void Upgrade::HandleCollision(Object* other)
 {
 	if(other->Type() == Object::Type::Player)
-		_isAlive = false;
+		IsAlive(false);
 }
 
 Upgrade::Type::E Upgrade::Power()

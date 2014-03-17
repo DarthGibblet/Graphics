@@ -2,7 +2,7 @@
 #include "Constants.h"
 
 Player::Player(const unsigned int upgradeMask) : Entity(glm::vec3(0, 0, 0), glm::vec3(0.8, 1, 1), "..\\resources\\Gust.dds", true, Object::Type::Player),
-		_jumpsRemaining(0), _isJumping(false), _wallJumpable(false), _dashTimer(0), _crouching(false), _dashReady(false), _dashing(false), _pendingCrouchRelease(false), 
+		_jumpsRemaining(0), _isJumping(false), _wallJumpable(false), _dashTimer(0), _crouching(false), _slashing(false), _slashTimer(0), _dashReady(false), _dashing(false), _pendingCrouchRelease(false), 
 		_movingLeft(false), _movingRight(false), _suspendFriction(true), _upgradeMask(upgradeMask)
 {
 	_shader = std::make_shared<Shader>("..\\resources\\Neon");
@@ -114,6 +114,21 @@ void Player::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std
 		_standingClearanceZone->Reset();
 	}
 
+	if(_slashing && _activeSlash)
+	{
+		if(!_activeSlash->IsAlive())
+		{
+			_activeSlash.reset();
+			_slashing = false;
+		}
+		else
+		{
+			glm::vec3 slashPos((_facingBackwards ? -Size().x : Size().x), Size().y / 2, 0);
+			_activeSlash->RelativePos(slashPos);
+			_activeSlash->FacingBackwards(FacingBackwards());
+		}
+	}
+
 	float curGlowVal = _shader->GetUniform("runningTime");
 	curGlowVal += static_cast<float>(secondsSinceLastUpdate);
 	_shader->SetUniform("runningTime", curGlowVal);
@@ -203,8 +218,19 @@ void Player::MoveRight()
 
 std::shared_ptr<Bullet> Player::Fire()
 {
-	glm::vec3 bulletVel(_facingBackwards ? -BULLET_SPEED : BULLET_SPEED, 0, 0);
-	return std::make_shared<Bullet>(Pos(), bulletVel, "..\\resources\\Bullet.dds", this);
+	if(!_slashing)
+	{
+		glm::vec3 slashPos((_facingBackwards ? -Size().x : Size().x), Size().y / 2, 0);
+		_activeSlash = std::make_shared<Slash>(slashPos, "..\\resources\\Shield.dds", this, glm::vec3(0.4, 0.4, 0.4));
+		_activeSlash->SetDeathTimer(1);
+		_slashing = true;
+		return _activeSlash;
+	}
+	return std::shared_ptr<Bullet>();
+	//Once weapon switching is enabled, this function will handle both cases, so leave the
+	//  bullet creation code in here for reference
+	//glm::vec3 bulletVel(_facingBackwards ? -BULLET_SPEED : BULLET_SPEED, 0, 0);
+	//return std::make_shared<Bullet>(Pos(), bulletVel, "..\\resources\\Bullet.dds", this);
 }
 
 unsigned Player::GetUpgradeMask() const

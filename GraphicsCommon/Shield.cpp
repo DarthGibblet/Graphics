@@ -10,11 +10,7 @@ void Shield::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std
 {
 	Vel(_owner->Vel());
 	glm::vec3 shieldPos = _owner->Pos();
-	shieldPos.x += _facingBackwards ? -0.5f : 0.5f;
+	shieldPos.x += _facingBackwards ? -Size().x : Size().x;
 	Pos(shieldPos);
 	Size(_owner->Size());
-}
-
-void Shield::HandleCollision(Object* other)
-{
 }

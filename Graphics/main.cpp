@@ -181,7 +181,6 @@ int main(int argc, char** argv)
 	std::string envName = "start";
 	uint32_t envEntranceId = 0;
 	save.Read(upgradeMask, envName, envEntranceId);
-	//envName = "one_zero";
 
 	Environment curEnv(envName, envEntranceId);
 
@@ -319,9 +318,12 @@ int main(int argc, char** argv)
 		if(_fire)
 		{
 			auto newBullet = player->Fire();
-			newBullet->SetBounds(-curEnv.MaxX(), curEnv.MaxX(), -curEnv.MaxY(), curEnv.MaxY());
-			masterList.push_back(newBullet);
-			_fire = false;
+			if(newBullet)
+			{
+				newBullet->SetBounds(-curEnv.MaxX(), curEnv.MaxX(), -curEnv.MaxY(), curEnv.MaxY());
+				masterList.push_back(newBullet);
+				_fire = false;
+			}
 		}
 		if(_save)
 		{

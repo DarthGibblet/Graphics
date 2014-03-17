@@ -14,7 +14,7 @@ private:
 };
 
 template<typename CONTAINER_T, typename FUNCTION_T>
-inline void foreach(const CONTAINER_T& container, FUNCTION_T& func)
+inline void foreach(CONTAINER_T& container, FUNCTION_T& func)
 {
 	//For some reason using std::for_each causes a drastic performance hit. Stick with the raw loop
 	//std::for_each(std::begin(container), std::end(container), func);

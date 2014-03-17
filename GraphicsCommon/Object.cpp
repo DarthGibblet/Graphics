@@ -35,14 +35,14 @@ bool Object::Core::StreamExtract(std::ifstream& stream)
 }
 
 Object::Object() : _rotAxis(0, 1, 0), _rotAngle(0), _falls(false), _isAlive(true),
-	_facingBackwards(false), _glQueryId(0)
+	_facingBackwards(false), _deathTimer(-1), _glQueryId(0)
 {
 	Text("");
 	glGenQueries(1, &_glQueryId);
 }
 
 Object::Object(const Object::Core& core) : _core(core), _rotAxis(0, 1, 0), _rotAngle(0), _falls(false), _isAlive(true),
-	_facingBackwards(false), _glQueryId(0)
+	_facingBackwards(false), _deathTimer(-1), _glQueryId(0)
 {
 	Text("");
 	glGenQueries(1, &_glQueryId);
@@ -50,7 +50,7 @@ Object::Object(const Object::Core& core) : _core(core), _rotAxis(0, 1, 0), _rotA
 
 Object::Object(const glm::vec3& pos, const glm::vec3& size, const std::string& textPath, bool falls, Type::E type) : 
 	_core(type, pos, size), _rotAxis(0, 1, 0), _rotAngle(0), _falls(falls), _isAlive(true),
-	_facingBackwards(false), _glQueryId(0)
+	_facingBackwards(false), _deathTimer(-1), _glQueryId(0)
 {
 	Text(textPath);
 	glGenQueries(1, &_glQueryId);
@@ -63,6 +63,13 @@ Object::~Object()
 
 void Object::Update(const double& secondsSinceLastUpdate, /*out*/std::vector<std::shared_ptr<Object>>& /*objList*/)
 {
+	if(_deathTimer > 0)
+	{
+		_deathTimer -= secondsSinceLastUpdate;
+		if(_deathTimer <= 0)
+			IsAlive(false);
+	}
+
 	if(_falls)
 	{
 		_vel.y -= (float)(GRAVITY_STRENGTH * secondsSinceLastUpdate);
@@ -96,9 +103,6 @@ bool Object::DoesCollide(std::shared_ptr<Object> other)
 
 bool Object::DoesCollide(Object* other)
 {
-	if(Type() == Object::Type::Bullet && other->Type() == Object::Type::Bullet)
-		return false;
-
 	if(abs(Pos().x - other->Pos().x) < Size().x / 2 + other->Size().x / 2)
 	{
 		if(abs(Pos().y - other->Pos().y) < Size().y / 2 + other->Size().y / 2)
@@ -153,7 +157,6 @@ void Object::HandleCollision(Object* other)
 		switch(other->Type())
 		{
 		case Type::Bullet:
-			//_isAlive = false;
 			break;
 		}
 		break;
@@ -229,10 +232,21 @@ void Object::IsAlive(const bool isAlive)
 	_isAlive = isAlive;
 }
 
-bool Object::IsAlive()
+bool Object::IsAlive() const
 {
 	return _isAlive;
 }
+
+void Object::FacingBackwards(const bool facingBackwards)
+{
+	_facingBackwards = facingBackwards;
+}
+
+bool Object::FacingBackwards()
+{
+	return _facingBackwards;
+}
+
 
 void Object::Text(const std::string& textPath)
 {
@@ -246,6 +260,11 @@ void Object::Text(const std::string& textPath)
 	{
 		_text = foundText->second;
 	}
+}
+
+void Object::SetDeathTimer(const double& secondsUntilDeath)
+{
+	_deathTimer = secondsUntilDeath;
 }
 
 bool Object::StreamInsert(std::ofstream& stream) const
